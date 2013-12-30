@@ -610,7 +610,7 @@ if ($form->validate()) {
 
     // User tag process
     //1. Deleting all user tags
-    $list_extra_field_type_tag = UserManager::get_all_extra_field_by_type(UserManager::USER_FIELD_TYPE_TAG);
+    $list_extra_field_type_tag = UserManager::get_all_extra_field_by_type(USER_FIELD_TYPE_TAG);
 
     if (is_array($list_extra_field_type_tag) && count($list_extra_field_type_tag)>0) {
         foreach ($list_extra_field_type_tag as $id) {

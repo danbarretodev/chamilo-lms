@@ -4696,7 +4696,7 @@ class SurveyUtil {
 				continue;
 			}
 			switch ($field_details[2]) {
-				case UserManager::USER_FIELD_TYPE_TEXT:
+				case USER_FIELD_TYPE_TEXT:
 					$field_list_array['extra_'.$field_details[1]]['name'] = $field_details[3];
 					if ($field_details[7] == 0) {
 						$field_list_array['extra_'.$field_details[1]]['visibility'] = 0;
@@ -4704,7 +4704,7 @@ class SurveyUtil {
 						$field_list_array['extra_'.$field_details[1]]['visibility'] = 1;
 					}
 					break;
-				case UserManager::USER_FIELD_TYPE_TEXTAREA:
+				case USER_FIELD_TYPE_TEXTAREA:
 					$field_list_array['extra_'.$field_details[1]]['name'] = $field_details[3];
 					if ($field_details[7] == 0) {
 						$field_list_array['extra_'.$field_details[1]]['visibility'] = 0;
@@ -4712,7 +4712,7 @@ class SurveyUtil {
 						$field_list_array['extra_'.$field_details[1]]['visibility'] = 1;
 					}
 					break;
-				case UserManager::USER_FIELD_TYPE_RADIO:
+				case USER_FIELD_TYPE_RADIO:
 
 					$field_list_array['extra_'.$field_details[1]]['name'] = $field_details[3];
 					if ($field_details[7] == 0) {
@@ -4722,7 +4722,7 @@ class SurveyUtil {
 					}
 					break;
 
-				case UserManager::USER_FIELD_TYPE_SELECT:
+				case USER_FIELD_TYPE_SELECT:
 					$field_list_array['extra_'.$field_details[1]]['name'] = $field_details[3];
 					if ($field_details[7] == 0) {
 						$field_list_array['extra_'.$field_details[1]]['visibility'] = 0;
@@ -4731,7 +4731,7 @@ class SurveyUtil {
 					}
 					break;
 
-				case UserManager::USER_FIELD_TYPE_SELECT_MULTIPLE:
+				case USER_FIELD_TYPE_SELECT_MULTIPLE:
 					$field_list_array['extra_'.$field_details[1]]['name'] = $field_details[3];
 					if ($field_details[7] == 0) {
 						$field_list_array['extra_'.$field_details[1]]['visibility'] = 0;
@@ -4740,7 +4740,7 @@ class SurveyUtil {
 					}
 					break;
 
-				case UserManager::USER_FIELD_TYPE_DATE:
+				case USER_FIELD_TYPE_DATE:
 					$field_list_array['extra_'.$field_details[1]]['name'] = $field_details[3];
 					if ($field_details[7] == 0) {
 						$field_list_array['extra_'.$field_details[1]]['visibility'] = 0;
@@ -4749,7 +4749,7 @@ class SurveyUtil {
 					}
 					break;
 
-				case UserManager::USER_FIELD_TYPE_DATETIME:
+				case USER_FIELD_TYPE_DATETIME:
 					$field_list_array['extra_'.$field_details[1]]['name'] = $field_details[3];
 					if ($field_details[7] == 0) {
 						$field_list_array['extra_'.$field_details[1]]['visibility'] = 0;
@@ -4758,7 +4758,7 @@ class SurveyUtil {
 					}
 					break;
 
-				case UserManager::USER_FIELD_TYPE_DOUBLE_SELECT:
+				case USER_FIELD_TYPE_DOUBLE_SELECT:
 					$field_list_array['extra_'.$field_details[1]]['name'] = $field_details[3];
 					if ($field_details[7] == 0) {
 						$field_list_array['extra_'.$field_details[1]]['visibility'] = 0;
@@ -4796,7 +4796,7 @@ class SurveyUtil {
 						}
 					}*/
 					break;
-				case UserManager::USER_FIELD_TYPE_DIVIDER:
+				case USER_FIELD_TYPE_DIVIDER:
 					//$form->addElement('static',$field_details[1], '<br /><strong>'.$field_details[3].'</strong>');
 					break;
 			}
