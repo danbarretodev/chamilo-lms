@@ -10,26 +10,25 @@
  * Code
  */
 
+// Constants for user extra field types.
+define('USER_FIELD_TYPE_TEXT', 1);
+define('USER_FIELD_TYPE_TEXTAREA', 2);
+define('USER_FIELD_TYPE_RADIO', 3);
+define('USER_FIELD_TYPE_SELECT', 4);
+define('USER_FIELD_TYPE_SELECT_MULTIPLE', 5);
+define('USER_FIELD_TYPE_DATE', 6);
+define('USER_FIELD_TYPE_DATETIME', 7);
+define('USER_FIELD_TYPE_DOUBLE_SELECT', 8);
+define('USER_FIELD_TYPE_DIVIDER', 9);
+define('USER_FIELD_TYPE_TAG', 10);
+define('USER_FIELD_TYPE_TIMEZONE', 11);
+define('USER_FIELD_TYPE_SOCIAL_PROFILE',12);
 /**
  * Class
  * @package chamilo.include.user
  */
 class UserManager
 {
-    // Constants for user extra field types.
-    const USER_FIELD_TYPE_TEXT = 1;
-    const USER_FIELD_TYPE_TEXTAREA = 2;
-    const USER_FIELD_TYPE_RADIO = 3;
-    const USER_FIELD_TYPE_SELECT = 4;
-    const USER_FIELD_TYPE_SELECT_MULTIPLE = 5;
-    const USER_FIELD_TYPE_DATE = 6;
-    const USER_FIELD_TYPE_DATETIME = 7;
-    const USER_FIELD_TYPE_DOUBLE_SELECT = 8;
-    const USER_FIELD_TYPE_DIVIDER = 9;
-    const USER_FIELD_TYPE_TAG = 10;
-    const USER_FIELD_TYPE_TIMEZONE = 11;
-    const USER_FIELD_TYPE_SOCIAL_PROFILE = 12;
-
     /**
      * The default constructor only instanciates an empty user object
      */
@@ -1404,14 +1403,14 @@ class UserManager
             $rowuf = Database::fetch_array($resuf);
 
             switch ($rowuf['field_type']) {
-                case self::USER_FIELD_TYPE_TAG :
+                case USER_FIELD_TYPE_TAG :
                     //4. Tags are process here comes from main/auth/profile.php
                     UserManager::process_tags(explode(';', $fvalues), $user_id, $rowuf['id']);
                     return true;
                     break;
-                case self::USER_FIELD_TYPE_RADIO:
-                case self::USER_FIELD_TYPE_SELECT:
-                case self::USER_FIELD_TYPE_SELECT_MULTIPLE:
+                case USER_FIELD_TYPE_RADIO:
+                case USER_FIELD_TYPE_SELECT:
+                case USER_FIELD_TYPE_SELECT_MULTIPLE:
                     $sqluo = "SELECT * FROM $t_ufo WHERE field_id = ".$rowuf['id'];
                     $resuo = Database::query($sqluo);
                     $values = split(';', $fvalues);
@@ -1634,8 +1633,8 @@ class UserManager
             return false;
         }
 
-        if (!empty($fieldoptions) && in_array($fieldtype, array(self::USER_FIELD_TYPE_RADIO, self::USER_FIELD_TYPE_SELECT, self::USER_FIELD_TYPE_SELECT_MULTIPLE, self::USER_FIELD_TYPE_DOUBLE_SELECT))) {
-            if ($fieldtype == self::USER_FIELD_TYPE_DOUBLE_SELECT) {
+        if (!empty($fieldoptions) && in_array($fieldtype, array(USER_FIELD_TYPE_RADIO, USER_FIELD_TYPE_SELECT, USER_FIELD_TYPE_SELECT_MULTIPLE, USER_FIELD_TYPE_DOUBLE_SELECT))) {
+            if ($fieldtype == USER_FIELD_TYPE_DOUBLE_SELECT) {
                 $twolist = explode('|', $fieldoptions);
                 $counter = 0;
                 foreach ($twolist as $individual_list) {
@@ -1728,7 +1727,7 @@ class UserManager
         $result = Database::query($sql);
 
         // we create an array with all the options (will be used later in the script)
-        if ($fieldtype == self::USER_FIELD_TYPE_DOUBLE_SELECT) {
+        if ($fieldtype == USER_FIELD_TYPE_DOUBLE_SELECT) {
             $twolist = explode('|', $fieldoptions);
             $counter = 0;
             foreach ($twolist as $individual_list) {
@@ -1847,7 +1846,7 @@ class UserManager
         $res = Database::query($sql);
         if (Database::num_rows($res) > 0) {
             while ($row = Database::fetch_array($res)) {
-                if ($row['type'] == self::USER_FIELD_TYPE_TAG) {
+                if ($row['type'] == USER_FIELD_TYPE_TAG) {
                     $tags = self::get_user_tags_to_string($user_id, $row['id'], false);
                     $extra_data['extra_'.$row['fvar']] = $tags;
                 } else {
@@ -1863,7 +1862,7 @@ class UserManager
                     if (Database::num_rows($resu) > 0) {
                         $rowu = Database::fetch_array($resu);
                         $fval = $rowu['fval'];
-                        if ($row['type'] == self::USER_FIELD_TYPE_SELECT_MULTIPLE) {
+                        if ($row['type'] == USER_FIELD_TYPE_SELECT_MULTIPLE) {
                             $fval = split(';', $rowu['fval']);
                         }
                     } else {
@@ -1872,13 +1871,13 @@ class UserManager
                     }
                     // We get here (and fill the $extra_data array) even if there is no user with data (we fill it with default values)
                     if ($prefix) {
-                        if ($row['type'] == self::USER_FIELD_TYPE_RADIO) {
+                        if ($row['type'] == USER_FIELD_TYPE_RADIO) {
                             $extra_data['extra_'.$row['fvar']]['extra_'.$row['fvar']] = $fval;
                         } else {
                             $extra_data['extra_'.$row['fvar']] = $fval;
                         }
                     } else {
-                        if ($row['type'] == self::USER_FIELD_TYPE_RADIO) {
+                        if ($row['type'] == USER_FIELD_TYPE_RADIO) {
                             $extra_data['extra_'.$row['fvar']]['extra_'.$row['fvar']] = $fval;
                         } else {
                             $extra_data[$row['fvar']] = $fval;
@@ -1930,7 +1929,7 @@ class UserManager
                 if (Database::num_rows($resu) > 0) {
                     $rowu = Database::fetch_array($resu);
                     $fval = $rowu['fval'];
-                    if ($row['type'] == self::USER_FIELD_TYPE_SELECT_MULTIPLE) {
+                    if ($row['type'] == USER_FIELD_TYPE_SELECT_MULTIPLE) {
                         $fval = split(';', $rowu['fval']);
                     }
                 }
@@ -3836,7 +3835,7 @@ class UserManager
             }
 
             switch ($field_details[2]) {
-                case self::USER_FIELD_TYPE_TEXT:
+                case USER_FIELD_TYPE_TEXT:
                     $form->addElement('text', 'extra_'.$field_details[1], $field_details[3], array('size' => 40));
                     $form->applyFilter('extra_'.$field_details[1], 'stripslashes');
                     $form->applyFilter('extra_'.$field_details[1], 'trim');
@@ -3846,7 +3845,7 @@ class UserManager
                             $form->freeze('extra_'.$field_details[1]);
                     }
                     break;
-                case self::USER_FIELD_TYPE_TEXTAREA:
+                case USER_FIELD_TYPE_TEXTAREA:
                     $form->add_html_editor('extra_'.$field_details[1], $field_details[3], false, false, array('ToolbarSet' => 'Profile', 'Width' => '100%', 'Height' => '130'));
                     //$form->addElement('textarea', 'extra_'.$field_details[1], $field_details[3], array('size' => 80));
                     $form->applyFilter('extra_'.$field_details[1], 'stripslashes');
@@ -3856,7 +3855,7 @@ class UserManager
                             $form->freeze('extra_'.$field_details[1]);
                     }
                     break;
-                case self::USER_FIELD_TYPE_RADIO:
+                case USER_FIELD_TYPE_RADIO:
                     $group = array();
                     foreach ($field_details[9] as $option_id => $option_details) {
                         $options[$option_details[1]] = $option_details[2];
@@ -3868,7 +3867,7 @@ class UserManager
                             $form->freeze('extra_'.$field_details[1]);
                     }
                     break;
-                case self::USER_FIELD_TYPE_SELECT:
+                case USER_FIELD_TYPE_SELECT:
                     $get_lang_variables = false;
                     if (in_array($field_details[1], array('mail_notify_message', 'mail_notify_invitation', 'mail_notify_group_message'))) {
                         $get_lang_variables = true;
@@ -3892,7 +3891,7 @@ class UserManager
                             $form->freeze('extra_'.$field_details[1]);
                     }
                     break;
-                case self::USER_FIELD_TYPE_SELECT_MULTIPLE:
+                case USER_FIELD_TYPE_SELECT_MULTIPLE:
                     $options = array();
                     foreach ($field_details[9] as $option_id => $option_details) {
                         $options[$option_details[1]] = $option_details[2];
@@ -3903,7 +3902,7 @@ class UserManager
                             $form->freeze('extra_'.$field_details[1]);
                     }
                     break;
-                case self::USER_FIELD_TYPE_DATE:
+                case USER_FIELD_TYPE_DATE:
                     $form->addElement('datepickerdate', 'extra_'.$field_details[1], $field_details[3], array('form_name' => $form_name));
                     $form->_elements[$form->_elementIndex['extra_'.$field_details[1]]]->setLocalOption('minYear', 1900);
                     $defaults['extra_'.$field_details[1]] = date('Y-m-d 12:00:00');
@@ -3914,7 +3913,7 @@ class UserManager
                     }
                     $form->applyFilter('theme', 'trim');
                     break;
-                case self::USER_FIELD_TYPE_DATETIME:
+                case USER_FIELD_TYPE_DATETIME:
                     $form->addElement('datepicker', 'extra_'.$field_details[1], $field_details[3], array('form_name' => $form_name));
                     $form->_elements[$form->_elementIndex['extra_'.$field_details[1]]]->setLocalOption('minYear', 1900);
                     $defaults['extra_'.$field_details[1]] = date('Y-m-d 12:00:00');
@@ -3925,7 +3924,7 @@ class UserManager
                     }
                     $form->applyFilter('theme', 'trim');
                     break;
-                case self::USER_FIELD_TYPE_DOUBLE_SELECT:
+                case USER_FIELD_TYPE_DOUBLE_SELECT:
                     foreach ($field_details[9] as $key => $element) {
                         if ($element[2][0] == '*') {
                             $values['*'][$element[0]] = str_replace('*', '', $element[2]);
@@ -3960,10 +3959,10 @@ class UserManager
                         }
                     }
                     break;
-                case self::USER_FIELD_TYPE_DIVIDER:
+                case USER_FIELD_TYPE_DIVIDER:
                     $form->addElement('static', $field_details[1], '<br /><strong>'.$field_details[3].'</strong>');
                     break;
-                case self::USER_FIELD_TYPE_TAG:
+                case USER_FIELD_TYPE_TAG:
                     //the magic should be here
                     $user_tags = UserManager::get_user_tags($user_id, $field_details[0]);
 
@@ -3998,12 +3997,12 @@ class UserManager
                     });
 EOF;
                     break;
-                case self::USER_FIELD_TYPE_TIMEZONE:
+                case USER_FIELD_TYPE_TIMEZONE:
                     $form->addElement('select', 'extra_'.$field_details[1], $field_details[3], api_get_timezones(), '');
                     if ($field_details[7] == 0)
                         $form->freeze('extra_'.$field_details[1]);
                     break;
-                case self::USER_FIELD_TYPE_SOCIAL_PROFILE:
+                case USER_FIELD_TYPE_SOCIAL_PROFILE:
                     // get the social network's favicon
                     $icon_path = UserManager::get_favicon_from_url($extra_data['extra_'.$field_details[1]], $field_details[4]);
                     // special hack for hi5
@@ -4034,18 +4033,18 @@ EOF;
     static function get_user_field_types()
     {
         $types = array();
-        $types[self::USER_FIELD_TYPE_TEXT] = get_lang('FieldTypeText');
-        $types[self::USER_FIELD_TYPE_TEXTAREA] = get_lang('FieldTypeTextarea');
-        $types[self::USER_FIELD_TYPE_RADIO] = get_lang('FieldTypeRadio');
-        $types[self::USER_FIELD_TYPE_SELECT] = get_lang('FieldTypeSelect');
-        $types[self::USER_FIELD_TYPE_SELECT_MULTIPLE] = get_lang('FieldTypeSelectMultiple');
-        $types[self::USER_FIELD_TYPE_DATE] = get_lang('FieldTypeDate');
-        $types[self::USER_FIELD_TYPE_DATETIME] = get_lang('FieldTypeDatetime');
-        $types[self::USER_FIELD_TYPE_DOUBLE_SELECT] = get_lang('FieldTypeDoubleSelect');
-        $types[self::USER_FIELD_TYPE_DIVIDER] = get_lang('FieldTypeDivider');
-        $types[self::USER_FIELD_TYPE_TAG] = get_lang('FieldTypeTag');
-        $types[self::USER_FIELD_TYPE_TIMEZONE] = get_lang('FieldTypeTimezone');
-        $types[self::USER_FIELD_TYPE_SOCIAL_PROFILE] = get_lang('FieldTypeSocialProfile');
+        $types[USER_FIELD_TYPE_TEXT] = get_lang('FieldTypeText');
+        $types[USER_FIELD_TYPE_TEXTAREA] = get_lang('FieldTypeTextarea');
+        $types[USER_FIELD_TYPE_RADIO] = get_lang('FieldTypeRadio');
+        $types[USER_FIELD_TYPE_SELECT] = get_lang('FieldTypeSelect');
+        $types[USER_FIELD_TYPE_SELECT_MULTIPLE] = get_lang('FieldTypeSelectMultiple');
+        $types[USER_FIELD_TYPE_DATE] = get_lang('FieldTypeDate');
+        $types[USER_FIELD_TYPE_DATETIME] = get_lang('FieldTypeDatetime');
+        $types[USER_FIELD_TYPE_DOUBLE_SELECT] = get_lang('FieldTypeDoubleSelect');
+        $types[USER_FIELD_TYPE_DIVIDER] = get_lang('FieldTypeDivider');
+        $types[USER_FIELD_TYPE_TAG] = get_lang('FieldTypeTag');
+        $types[USER_FIELD_TYPE_TIMEZONE] = get_lang('FieldTypeTimezone');
+        $types[USER_FIELD_TYPE_SOCIAL_PROFILE] = get_lang('FieldTypeSocialProfile');
 
         return $types;
     }
