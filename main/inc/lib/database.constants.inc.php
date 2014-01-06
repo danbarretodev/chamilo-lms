@@ -338,3 +338,17 @@ define('TABLE_TIMELINE',                    'timeline');
 //Gradebook model
 define('TABLE_GRADE_MODEL',                  'grade_model');
 define('TABLE_GRADE_MODEL_COMPONENTS',       'grade_components');
+
+//Sequence tables
+define('TABLE_MAIN_SEQUENCE',                'sequence');
+define('TABLE_SEQUENCE_CONDITION',           'sequence_condition');
+define('TABLE_SEQUENCE_FORMULA',             'sequence_formula');
+define('TABLE_SEQUENCE_METHOD',              'sequence_method');
+define('TABLE_SEQUENCE_ROW_ENTITY',          'sequence_row_entity');
+define('TABLE_SEQUENCE_RULE',                'sequence_rule');
+define('TABLE_SEQUENCE_RULE_CONDITION',      'sequence_condition');
+define('TABLE_SEQUENCE_RULE_METHOD',         'sequence_rule_method');
+define('TABLE_SEQUENCE_TYPE_ENTITY',         'sequence_type_entity');
+define('TABLE_SEQUENCE_VALID',               'sequence_valid');
+define('TABLE_SEQUENCE_VALUE',               'sequence_value');
+define('TABLE_SEQUENCE_VARIABLE',            'sequence_variable');
