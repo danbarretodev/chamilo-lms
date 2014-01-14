@@ -113,8 +113,6 @@ class CourseHome
                 $published_lp_id = self::get_published_lp_id_from_link($tool['link']);
                 if (!api_is_allowed_to_edit(null, true) && !learnpath::is_lp_visible_for_student($published_lp_id, api_get_user_id())) {
                     continue;
-                }elseif (!self::get_available_lp_by_id($published_lp_id)) {
-                    continue;
                 }
             }
 
@@ -296,8 +294,6 @@ class CourseHome
                     $published_lp_id = self::get_published_lp_id_from_link($tool['link']);
 
                     if (!api_is_allowed_to_edit(null, true) && !learnpath::is_lp_visible_for_student($published_lp_id, api_get_user_id())) {
-                        continue;
-                    }elseif (!self::get_available_lp_by_id($published_lp_id)) {
                         continue;
                     }
                 }
@@ -634,8 +630,6 @@ class CourseHome
                     $published_lp_id = self::get_published_lp_id_from_link($tool['link']);
                     if (api_is_allowed_to_edit(null, true)) {
                         $studentview = true;
-                    }elseif (!self::get_available_lp_by_id($published_lp_id)) {
-                        continue;
                     }
                     if (!api_is_allowed_to_edit(null, true) && !learnpath::is_lp_visible_for_student($published_lp_id, api_get_user_id())) {
                         continue;
@@ -1088,25 +1082,5 @@ class CourseHome
             $html .= '</div>';
         }
         return $html;
-    }
-
-    /**
-     * Bool Available for LP
-     */
-    static function get_available_lp_by_id ($id) {
-        $seq_val_table = Database::get_main_table(TABLE_SEQUENCE_VALUE);
-        $this_user_id = api_get_user_id();
-        require_once 'sequence.lib.php';
-        $row_entity_id = Sequence::get_row_entity_id_by_row_id(1, $id, api_get_course_int_id(), api_get_session_id());
-        $seq_go = false;
-        if ($row_entity_id > 0) {
-            $sql_seq = "SELECT val.available available FROM $seq_val_table val WHERE val.sequence_row_entity_id = $row_entity_id AND val.user_id = $this_user_id LIMIT 0, 1";
-            $result_seq = Database::query($sql_seq);
-            $arr_seq = Database::fetch_array($result_seq);
-            if ($arr_seq['available'] > 0) {
-                $seq_go = true;
-            }
-        }
-        return $seq_go;
     }
 }
