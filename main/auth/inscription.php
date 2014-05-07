@@ -337,7 +337,6 @@ if ($form->validate()) {
 
     //$values = $form->exportValues();
     $values = $form->getSubmitValues(1);
-    error_log(print_r($values,1));
     $values['username'] = api_substr($values['username'], 0, USERNAME_MAX_LENGTH); //make *sure* the login isn't too long
 
     if (api_get_setting('allow_registration_as_teacher') == 'false') {
