@@ -11,6 +11,9 @@ use \ChamiloSession as Session;
 $debug = 0;
 if ($debug > 0) error_log('New LP -+- Entered lp_controller.php -+- (action: '.$_REQUEST['action'].')', 0);
 
+// Flag to allow for anonymous user - needs to be set before global.inc.php.
+$use_anonymous = true;
+
 // Language files that needs to be included.
 if (isset($_GET['action'])) {
     if ($_GET['action'] == 'export') {
@@ -273,6 +276,7 @@ if (!empty($_REQUEST['dialog_box'])) {
 $lp_controller_touched = 1;
 $lp_found = false;
 
+/*
 if (isset($_SESSION['lpobject'])) {
     if ($debug > 0) error_log('New LP - SESSION[lpobject] is defined', 0);
     $oLP = unserialize($_SESSION['lpobject']);
@@ -289,6 +293,47 @@ if (isset($_SESSION['lpobject'])) {
             $lp_found = true;
         }
     }
+}
+*/
+
+$lpobject = Session::read('lpobject');
+$user_id = api_get_user_id();
+if (isset($lpobject)) {
+    if (is_object($lpobject)) {
+        $oLP = $lpobject;
+    } else {
+        $oLP = unserialize($lpobject);
+    }
+    if (!is_object($oLP) or !is_a($oLP, 'learnpath')) {
+        unset($oLP);
+        $code = api_get_course_id();
+        $oLP = new learnpath($code, $lp_id, $user_id);
+        if ($debug) error_log("Object was not learnpath. Recreated learnpath from lp_id and course_code");
+    } else {
+        if (count($oLP->items)==0) {
+            $code = api_get_course_id();
+            $oLP = new learnpath($code, $oLP->lp_id, $user_id);
+            $items = $oLP->items;
+        }
+        if ($debug) error_log("Loading learnpath from unserialize");
+    }
+} else {
+    $code = api_get_course_id();
+    $oLP = new learnpath($code, $lp_id, $user_id);
+    if ($debug) {
+        error_log("lpobject was not set, generated from lp_id and course code");
+    }
+}
+
+// This come from previous code
+if ($myrefresh == 1 OR empty($oLP->cc) OR $oLP->cc != api_get_course_id() OR $oLP->lp_view_session_id != $session_id OR $oLP->scorm_debug == '1') {
+    if ($debug > 0) error_log('New LP - Course has changed, discard lp object', 0);
+    if ($myrefresh == 1) { $myrefresh_id = $oLP->get_id(); }
+    Session::erase('oLP');
+    Session::erase('lpobject');
+} else {
+    $_SESSION['oLP'] = $oLP;
+    $lp_found = true;
 }
 
 $course_id = api_get_course_int_id();

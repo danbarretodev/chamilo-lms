@@ -56,34 +56,37 @@ function save_item($lp_id, $user_id, $view_id, $item_id, $score = -1, $max = -1,
         error_log("score: $score - max:$max - min: $min - status:$status - time:$time - suspend: $suspend - location: $location - core_exit: $core_exit");
     }
 
+    if (empty($courseId)) {
+        $courseId = api_get_course_int_id();
+    }
+
+    if (empty($sessionId)) {
+        $sessionId = api_get_session_id();
+    }
+
     $mylp = null;
     $lpobject = Session::read('lpobject');
-    if (!is_object($lpobject) && isset($sessionId) && isset($courseId)) {
-        $lpobject = new learnpathItem($lp_id, $user_id, $courseId);
-    }
     if (isset($lpobject)) {
-        $oLP = unserialize($lpobject);
-        if ($debug) error_log("lpobject was set");
-        if (!is_object($oLP)) {
+        if (is_object($lpobject)) {
+            $oLP = $lpobject;
+        } else {
+            $oLP = unserialize($lpobject);
+        }
+        if (!is_object($oLP) or !is_a($oLP, 'learnpath')) {
             unset($oLP);
             $code = api_get_course_id();
             $mylp = new learnpath($code, $lp_id, $user_id);
-            if ($debug) error_log("Creating learnpath");
+            if ($debug) error_log("Object was not learnpath. Recreated learnpath from lp_id and course_code");
         } else {
             $mylp = $oLP;
             if ($debug) error_log("Loading learnpath from unserialize");
         }
     } else {
+        $code = api_get_course_id();
+        $mylp = new learnpath($code, $lp_id, $user_id);
         if ($debug) {
-            error_log("lpobject was not set");
+            error_log("lpobject was not set, generated from lp_id and course code");
         }
-    }
-
-    if (!is_a($mylp, 'learnpath')) {
-        if ($debug) {
-            error_log("mylp variable is not an learnpath object");
-        }
-        return null;
     }
 
     $prereq_check = $mylp->prerequisites_match($item_id);
@@ -91,10 +94,11 @@ function save_item($lp_id, $user_id, $view_id, $item_id, $score = -1, $max = -1,
     /** @var learnpathItem $mylpi */
     $mylpi = $mylp->items[$item_id];
 
-    if (empty($mylpi)) {
+    if (empty($mylpi) or !is_object($mylpi)) {
         if ($debug > 0) {
             error_log("item #$item_id not found in the items array: ".print_r($mylp->items, 1));
         }
+
         return false;
     }
 
