@@ -12,12 +12,13 @@ $cidReset = true;
 require_once '../inc/global.inc.php';
 
 if (api_get_setting('allow_social_tool') !='true') {
-    $url = api_get_path(WEB_PATH).'whoisonline.php?id='.intval($_GET['u']);
+    $url = api_get_path(WEB_PATH).'whoisonline.php?id='.Security::remove_XSS($_GET['u']);
     header('Location: '.$url);
     exit;
 }
 
 $user_id = api_get_user_id();
+$u = base64_decode(Security::remove_XSS($_GET['u']));
 $isAdmin = api_is_platform_admin($user_id);
 
 $show_full_profile = true;
@@ -26,7 +27,7 @@ $this_section = SECTION_SOCIAL;
 
 //I'm your friend? I can see your profile?
 if (isset($_GET['u'])) {
-    $user_id     = (int) Database::escape_string($_GET['u']);
+    $user_id     = (int) Database::escape_string($u);
     if (api_is_anonymous($user_id, true)) {
         api_not_allowed(true);
     }
@@ -269,15 +270,15 @@ if (isset($_GET['shared'])) {
 }
 $interbreadcrumb[]= array ('url' =>'home.php','name' => get_lang('SocialNetwork') );
 
-if (isset($_GET['u']) && is_numeric($_GET['u']) && $_GET['u'] != api_get_user_id()) {
-    $info_user =   api_get_user_info($_GET['u']);
+if (isset($_GET['u']) && $u != api_get_user_id()) {
+    $info_user =   api_get_user_info($u);
     $interbreadcrumb[]= array (
         'url' => '#',
         'name' => api_get_person_name($info_user['firstName'], $info_user['lastName']));
     $nametool = '';
 }
 if (isset($_GET['u'])) {
-    $param_user='u='.Security::remove_XSS($_GET['u']);
+    $param_user='u='.$u;
 }else {
     $info_user = api_get_user_info(api_get_user_id());
     $param_user = '';
@@ -289,7 +290,7 @@ $_SESSION['social_user_id'] = intval($user_id);
  */
 
 //Setting some course info
-$my_user_id=isset($_GET['u']) ? Security::remove_XSS($_GET['u']) : api_get_user_id();
+$my_user_id=isset($_GET['u']) ? $u : api_get_user_id();
 $personal_course_list = UserManager::get_personal_session_course_list($my_user_id);
 
 $course_list_code = array();
@@ -672,7 +673,7 @@ if ($show_full_profile) {
     }
 
     $count_pending_invitations = 0;
-    if (!isset($_GET['u']) || (isset($_GET['u']) && $_GET['u']==api_get_user_id())) {
+    if (!isset($_GET['u']) || (isset($_GET['u']) && $u == api_get_user_id())) {
         $pending_invitations = SocialManager::get_list_invitation_of_friends_by_user_id(api_get_user_id());
         $list_get_path_web     = SocialManager::get_list_web_path_user_invitation_by_user_id(api_get_user_id());
         $count_pending_invitations = count($pending_invitations);
@@ -681,7 +682,7 @@ if ($show_full_profile) {
     if (!empty($production_list) || !empty($file_list) || $count_pending_invitations > 0) {
 
         //Pending invitations
-        if (!isset($_GET['u']) || (isset($_GET['u']) && $_GET['u']==api_get_user_id())) {
+        if (!isset($_GET['u']) || (isset($_GET['u']) && $u == api_get_user_id())) {
             if ($count_pending_invitations > 0) {
                 $invitations =  '<div><h3>'.get_lang('PendingInvitations').'</h3></div>';
                 for ($i=0;$i<$count_pending_invitations;$i++) {

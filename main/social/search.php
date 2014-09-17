@@ -174,7 +174,7 @@ if ($query != '') {
             $send_inv      = '<button class="btn btn-mini disabled "><i class="icon-user"></i> '.get_lang('SendInvitation').'</button><br /><br />';
             $relation_type = intval(SocialManager::get_relation_between_contacts(api_get_user_id(), $user['user_id']));
             $user_info     = api_get_user_info($user['user_id'], true);
-            $url           = api_get_path(WEB_PATH).'main/social/profile.php?u='.$user['user_id'];
+            $url           = api_get_path(WEB_PATH).'main/social/profile.php?u='.base64_encode($user['user_id']);
 
             // Show send invitation icon if they are not friends yet
             if ($relation_type != 3 && $relation_type != 4 && $user['user_id'] != api_get_user_id()) {

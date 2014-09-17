@@ -1072,7 +1072,7 @@ class MessageManager
                 $image_repository = $image_path['dir'];
                 $existing_image = $image_path['file'];
 
-                $user_info = '<td valign="top"><a href="'.api_get_path(WEB_PATH).'main/social/profile.php?u='.$topic['user_sender_id'].'">'.$name.'&nbsp;</a>';
+                $user_info = '<td valign="top"><a href="'.api_get_path(WEB_PATH).'main/social/profile.php?u='.base64_encode($topic['user_sender_id']).'">'.$name.'&nbsp;</a>';
                 $user_info .= '<div class="message-group-author"><img src="'.$image_repository.$existing_image.'" alt="'.$name.'"  width="32" height="32" title="'.$name.'" /></div>';
                 $user_info .= '</td>';
 
@@ -1146,7 +1146,7 @@ class MessageManager
         $image_repository = $image_path['dir'];
         $existing_image = $image_path['file'];
         $main_content.= '<div class="message-group-author"><img src="'.$image_repository.$existing_image.'" alt="'.$name.'"  width="32" height="32" title="'.$name.'" /></div>';
-        $user_link = '<a href="'.api_get_path(WEB_PATH).'main/social/profile.php?u='.$main_message['user_sender_id'].'">'.$name.'&nbsp;</a>';
+        $user_link = '<a href="'.api_get_path(WEB_PATH).'main/social/profile.php?u='.base64_encode($main_message['user_sender_id']).'">'.$name.'&nbsp;</a>';
 
         $date = '';
         if ($main_message['send_date'] != $main_message['update_date']) {
@@ -1192,7 +1192,7 @@ class MessageManager
                 $image_repository = $image_path['dir'];
                 $existing_image = $image_path['file'];
                 $html_items.= '<div class="message-group-author"><img src="'.$image_repository.$existing_image.'" alt="'.$name.'"  width="32" height="32" title="'.$name.'" /></div>';
-                $user_link = '<a href="'.api_get_path(WEB_PATH).'main/social/profile.php?u='.$topic['user_sender_id'].'">'.$name.'&nbsp;</a>';
+                $user_link = '<a href="'.api_get_path(WEB_PATH).'main/social/profile.php?u='.base64_encode($topic['user_sender_id']).'">'.$name.'&nbsp;</a>';
 
                 $date = '';
                 if ($topic['send_date'] != $topic['update_date']) {

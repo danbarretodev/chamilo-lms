@@ -119,13 +119,14 @@ if ($number_loop != 0) {
         $title 		= Security::remove_XSS($invitation['title'], STUDENT, true);
         $content 	= Security::remove_XSS($invitation['content'], STUDENT, true);
         $date		= api_convert_and_format_date($invitation['send_date'], DATE_TIME_FORMAT_LONG);
+        $senderUserIdEncoded = base64_encode($sender_user_id);
 
         $social_right_content .= '<div class="span2">
-                        <a class="thumbnail" href="profile.php?u='.$sender_user_id.'">
+                        <a class="thumbnail" href="profile.php?u='.$senderUserIdEncoded.'">
                         <img src="'.$friends_profile['file'].'" /></a>
                 </div>
                 <div class="span3">
-                    <a href="profile.php?u='.$sender_user_id.'">'.api_get_person_name($user_info['firstName'], $user_info['lastName']).'</a> :
+                    <a href="profile.php?u='.$senderUserIdEncoded.'">'.api_get_person_name($user_info['firstName'], $user_info['lastName']).'</a> :
                     '.$content.'
                     <div>
                     '.get_lang('DateSend').' : '.$date.'
@@ -155,13 +156,15 @@ if (count($list_get_invitation_sent) > 0) {
         $title		= Security::remove_XSS($invitation['title'], STUDENT, true);
         $content	= Security::remove_XSS($invitation['content'], STUDENT, true);
         $date		= api_convert_and_format_date($invitation['send_date'], DATE_TIME_FORMAT_LONG);
+        $senderUserIdEncoded = base64_encode($sender_user_id);
+
         $social_right_content .= '
                         <div class="span2">
-                            <a class="thumbnail" href="profile.php?u='.$sender_user_id.'">
+                            <a class="thumbnail" href="profile.php?u='.$senderUserIdEncoded.'">
                                 <img src="'.$friends_profile['file'].'"  /></a>
                             </div>
                         <div class="span3">
-                            <a class="profile_link" href="profile.php?u='.$sender_user_id.'">'.api_get_person_name($user_info['firstName'], $user_info['lastName']).'</a>
+                            <a class="profile_link" href="profile.php?u='.$senderUserIdEncoded.'">'.api_get_person_name($user_info['firstName'], $user_info['lastName']).'</a>
                             <div>
                             '. $title.' : '.$content.'
                             </div>

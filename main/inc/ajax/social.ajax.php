@@ -93,7 +93,7 @@ switch ($action) {
                         $friend_html.='<div class="thumbnail" onMouseover="show_icon_delete(this)" onMouseout="hide_icon_delete(this)" class="image-social-content" id=div_'.$friends[$j]['friend_user_id'].'>';
                         $friend_html.='<img src="'.$friends_profile['file'].'" id="imgfriend_'.$friend['friend_user_id'].'" title="'.$user_name.'" />';
                         $friend_html.='<div class="caption">';
-                        $friend_html.='<a href="profile.php?u='.$friend['friend_user_id'].'"><h5>'.$user_name.'</h5></a>';
+                        $friend_html.='<a href="profile.php?u='.base64_encode($friend['friend_user_id']).'"><h5>'.$user_name.'</h5></a>';
                         $friend_html.='<p><button class="btn" onclick="delete_friend(this)" id=img_'.$friend['friend_user_id'].'>'.get_lang('Delete').'</button></p>';
                         $friend_html.='</div>';
                         $friend_html.='</div>';

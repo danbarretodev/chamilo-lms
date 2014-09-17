@@ -52,7 +52,7 @@
             <div class="span4">
                 <div class="well_border">                                 
                     <h3>
-                        <img src="{{user.user.avatar_small}}" /> 
+                        <img src="{{user.user.avatar_small}}" />
                         <a href="{{ _p.web_main }}social/profile.php?u={{ user['user'].user_id }}">{{ user['user'].complete_name }} ({{user['user'].username}}) </a>
                     </h3>
                     <hr >

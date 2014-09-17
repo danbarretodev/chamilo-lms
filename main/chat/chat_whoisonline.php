@@ -127,7 +127,7 @@ if (!empty($course)) {
 				    $fileUrl = $userImage['dir'].$userImage['file'];
                                 }
 				$email = $user['email'];
-				$url_user_profile=api_get_path(WEB_CODE_PATH).'social/profile.php?u='.$user['user_id'].'&';
+				$url_user_profile=api_get_path(WEB_CODE_PATH).'social/profile.php?u='.base64_encode($user['user_id']).'&';
 			?>
 			<li class="list-group-item">
 				<img src="<?php echo $fileUrl;?>" border="0" width="50" alt="" class="user-image-chat" />
