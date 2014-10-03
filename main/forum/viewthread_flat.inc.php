@@ -17,8 +17,8 @@ if (isset($current_thread['thread_id'])) {
     $locked = api_resource_is_locked_by_gradebook($clean_thread_id, LINK_FORUM_THREAD);
     if (!empty($rows)) {
         foreach ($rows as $row) {
-
-            echo '<table width="100%" class="forum_table" cellspacing="5" border="0">';
+            $postId = $row['post_id'];
+            echo '<table width="100%" class="forum_table" cellspacing="5" border="0" data-post-id="' . $postId . '">';
             // the style depends on the status of the message: approved or not
             if ($row['visible']=='0') {
                 $titleclass='forum_message_post_title_2_be_approved';
@@ -97,7 +97,7 @@ if (isset($current_thread['thread_id'])) {
             if (($current_forum_category && $current_forum_category['locked']==0) AND $current_forum['locked']==0 AND $current_thread['locked']==0 OR api_is_allowed_to_edit(false,true)) {
                 if ($_user['user_id'] OR ($current_forum['allow_anonymous']==1 AND !$_user['user_id'])) {
                     if (!api_is_anonymous() && api_is_allowed_to_session_edit(false,true)) {
-                        echo '<a href="reply.php?'.api_get_cidreq().'&amp;forum='.$clean_forum_id.'&amp;thread='.$clean_thread_id.'&amp;post='.$row['post_id'].'&amp;action=replymessage&amp;origin='.$origin.'">'.Display :: return_icon('message_reply_forum.png', get_lang('ReplyToMessage'))."</a>";
+                        echo getPostAction('reply', $clean_forum_id, $clean_thread_id, $row['post_id'], $origin);
                         echo '<a href="reply.php?'.api_get_cidreq().'&amp;forum='.$clean_forum_id.'&amp;thread='.$clean_thread_id.'&amp;post='.$row['post_id'].'&amp;action=quote&amp;origin='.$origin.'">'.Display :: return_icon('quote.gif', get_lang('QuoteMessage'))."</a>";
                     }
                 }

@@ -36,7 +36,50 @@ function setFocus(){
 }
 $(document).ready(function () {
     setFocus();
+    addReply();
 });
+</script>';
+
+$htmlHeadXtra[] = '<script type = "text/javascript">
+function addReply() {
+    $(document).on("click", ".postActionReply", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var postHtml = $(this).closest(".forum_table");
+        var postId = postHtml.data("post-id");
+        var postTitle = postHtml.find(".forum_message_post_title").html();
+        var replyForm = getReplyForm(postId, postTitle);
+        postHtml.after(replyForm);
+        replyForm.slideDown("slow");
+    });
+}
+
+function deleteReply (postId) {
+    $(document).on("click", ".deleteReplyButton", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $(this).closest("replyFormPrototype" + postId).slideUp();
+    });
+}
+
+function getReplyForm (postId, postTitle) {
+    var postTitle = "Re:" + postTitle;
+    var replyForm = $("#replyFormPrototype");
+    var threadForm = replyForm.find("#thread");
+    if (threadForm.find("input[name=\'post_parent_id\']").length > 0) {
+        threadForm.find("input[name=\'post_parent_id\']").val(postId);
+    } else {
+        threadForm.append($(\'<input type="hidden" value="\' + postId + \'" name="post_parent_id">\'));
+    }
+    threadForm.find("input[name=\'post_title\']").val(postTitle);
+    /*
+    var replyForm = $("#replyFormPrototype").clone();
+    replyForm.attr("id", "replyFormPrototype" + postId);
+     */
+    replyForm.slideUp();
+
+    return replyForm;
+}
 </script>';
 
 /**
@@ -2211,7 +2254,7 @@ function store_thread($current_forum, $values)
  * @author Patrick Cool <patrick.cool@UGent.be>, Ghent University
  * @version february 2006, dokeos 1.8
  */
-function show_add_post_form($current_forum, $forum_setting, $action = '', $id = '', $form_values = '')
+function show_add_post_form($current_forum, $forum_setting, $action = '', $id = '', $form_values = '', $display = true)
 {
     $_user = api_get_user_info();
     $gradebook = isset($_GET['gradebook']) ? Security::remove_XSS($_GET['gradebook']) : null;
@@ -2244,7 +2287,9 @@ function show_add_post_form($current_forum, $forum_setting, $action = '', $id = 
     );
     $form->setConstants(array('forum' => '5'));
 
-    $form->addElement('header', $text);
+    if ($display) {
+        $form->addElement('header', $text);
+    }
 
     // Setting the form elements.
     $form->addElement('hidden', 'forum_id', intval($my_forum));
@@ -2257,16 +2302,20 @@ function show_add_post_form($current_forum, $forum_setting, $action = '', $id = 
         $form->applyFilter('poster_name', 'html_filter');
     }
 
-    $form->addElement('text', 'post_title', get_lang('Title'));
+    $form->addElement('text', 'post_title', get_lang('Title'), true);
 
     $form->addElement('html_editor', 'post_text', get_lang('Text'), true, api_is_allowed_to_edit(null, true) ? array('ToolbarSet' => 'Forum', 'Width' => '100%', 'Height' => '300') : array('ToolbarSet' => 'ForumStudent', 'Width' => '100%', 'Height' => '300', 'UserStatus' => 'student')
     );
 
     $form->addRule('post_text', get_lang('ThisFieldIsRequired'), 'required');
-    $form->addElement('advanced_settings', '<a href="javascript://" onclick="return advanced_parameters()">
-    						  <span id="img_plus_and_minus">&nbsp;'.Display::return_icon('div_show.gif', get_lang('Show'), array('style' => 'vertical-align:middle')).' '.get_lang('AdvancedParameters').'</span></a>');
+    if ($display) {
 
-    $form->addElement('html', '<div id="id_qualify" style="display:none">');
+        $form->addElement('advanced_settings', '<a href="javascript://" onclick="return advanced_parameters()">
+    						  <span id="img_plus_and_minus">&nbsp;'.Display::return_icon('div_show.gif', get_lang('Show'), array('style' => 'vertical-align:middle')).' '.get_lang('AdvancedParameters').'</span></a>');
+        $form->addElement('html', '<div id="id_qualify" style="display:none">');
+    } else {
+        $form->addElement('html', '<div id="id_qualify">');
+    }
 
     if ((api_is_course_admin() || api_is_course_coach() || api_is_course_tutor()) && !($my_thread)) {
 
@@ -2365,15 +2414,21 @@ function show_add_post_form($current_forum, $forum_setting, $action = '', $id = 
         $form->addElement('hidden', 'sec_token');
         $form->setConstants(array('sec_token' => $token));
 
-        $iframe = null;
 
-        if ($forum_setting['show_thread_iframe_on_reply'] && $action != 'newthread') {
-            $iframe = "<iframe style=\"border: 1px solid black\" src=\"iframe_thread.php?forum=".Security::remove_XSS($my_forum)."&amp;thread=".Security::remove_XSS($my_thread)."#".Security::remove_XSS($my_post)."\" width=\"100%\"></iframe>";
+        if ($display) {
+            $iframe = null;
+
+            if ($forum_setting['show_thread_iframe_on_reply'] && $action != 'newthread') {
+                $iframe = "<iframe style=\"border: 1px solid black\" src=\"iframe_thread.php?forum=".Security::remove_XSS($my_forum)."&amp;thread=".Security::remove_XSS($my_thread)."#".Security::remove_XSS($my_post)."\" width=\"100%\"></iframe>";
+            }
+            if (!empty($iframe)) {
+                $form->addElement('label', get_lang('Thread'), $iframe);
+            }
+            $form->display();
+        } else {
+
+            return $form->return_form();
         }
-        if (!empty($iframe)) {
-            $form->addElement('label', get_lang('Thread'), $iframe);
-        }
-        $form->display();
     }
 }
 
@@ -4631,4 +4686,43 @@ function _phorum_recursive_sort($rows, &$threads, $seed = 0, $indent = 0)
             _phorum_recursive_sort($rows, $threads, $child, $indent);
         }
     }
+}
+
+/**
+ * Return HTML for specified action type
+ * @param $type
+ * @param $forumId
+ * @param $threadId
+ * @param $postId
+ * @param null $origin
+ * @return string
+ */
+function getPostAction($type, $forumId, $threadId, $postId, $origin = null)
+{
+
+    $html = '';
+    $forumId = intval($forumId);
+    $threadId = intval($threadId);
+    $postId = intval($postId);
+    $origin = htmlentities($origin);
+    if (!empty($type) && is_string($type)) {
+        switch ($type) {
+            case 'delete' :
+                break;
+            case 'edit' :
+                break;
+            case 'hide' :
+                break;
+            case 'reply' :
+                $html .= '<a class="postActionReply" href="reply.php?' . api_get_cidreq() . '&forum=' . $forumId .
+                '&thread=' . $threadId .'&post='. $postId .'&action=replymessage&origin=' . $origin . '">'.
+                Display::return_icon('message_reply_forum.png', get_lang('ReplyToMessage'))."</a>";
+                break;
+            case 'quote' :
+                break;
+            default :
+                break;
+        }
+    }
+    return $html;
 }

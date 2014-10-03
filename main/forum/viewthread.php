@@ -209,6 +209,12 @@ if ($my_message != 'PostDeletedSpecial') {
     }
 }
 
+/* FORM PRTOTYPE */
+
+$values = show_add_post_form($current_forum, $forum_setting, 'replymessage', -1, null, false);
+echo Display::div($values, array('style' => 'display: none', 'id' => 'replyFormPrototype'));
+
+
 /* FOOTER */
 
 if ($origin != 'learnpath') {
