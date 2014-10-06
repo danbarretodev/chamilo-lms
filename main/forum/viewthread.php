@@ -212,6 +212,16 @@ if ($my_message != 'PostDeletedSpecial') {
 /* FORM PRTOTYPE */
 
 $values = show_add_post_form($current_forum, $forum_setting, 'replymessage', -1, null, false);
+if (!empty($values) AND isset($_POST['SubmitPost'])) {
+    $result = store_reply($current_forum, $values);
+    //@todo split the show_add_post_form function
+
+    $url = 'viewthread.php?forum='.$current_forum['forum_id'].'&gradebook='.$gradebook.'&thread='.intval($_GET['thread']).'&gidReq='.api_get_group_id().'&origin='.$origin.'&msg='.$result['msg'].'&type='.$result['type'];
+    echo '
+    <script>
+    window.location = "'.$url.'";
+    </script>';
+}
 echo Display::div($values, array('style' => 'display: none', 'id' => 'replyFormPrototype'));
 
 
