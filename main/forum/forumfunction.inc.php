@@ -37,6 +37,7 @@ function setFocus(){
 $(document).ready(function () {
     setFocus();
     addReply();
+    sendReplyMessage();
 });
 </script>';
 
@@ -63,8 +64,14 @@ function deleteReply (postId) {
 }
 
 function getReplyForm (postId, postTitle) {
+    var replyForm
+    if ($("#replyForm").length > 0) {
+        replyForm = $("#replyForm");
+    } else {
+        replyForm = $("#replyFormPrototype").clone();
+        replyForm.attr("id", "replyForm");
+    }
     var postTitle = "Re:" + postTitle;
-    var replyForm = $("#replyFormPrototype");
     var threadForm = replyForm.find("#thread");
     if (threadForm.find("input[name=\'post_parent_id\']").length > 0) {
         threadForm.find("input[name=\'post_parent_id\']").val(postId);
@@ -72,14 +79,30 @@ function getReplyForm (postId, postTitle) {
         threadForm.append($(\'<input type="hidden" value="\' + postId + \'" name="post_parent_id">\'));
     }
     threadForm.find("input[name=\'post_title\']").val(postTitle);
-    /*
-    var replyForm = $("#replyFormPrototype").clone();
-    replyForm.attr("id", "replyFormPrototype" + postId);
-     */
     replyForm.slideUp();
 
     return replyForm;
 }
+
+function sendReplyMessage () {
+    return false;
+    .ajax({
+        type: "POST",
+        url: "forum.ajax.php",
+        data: {
+
+        }
+        done: function(data) {
+            if (data.error) {
+                alert(data.errorMessage);
+            } else {
+
+
+            }
+        }
+    });
+}
+
 </script>';
 
 /**
@@ -850,31 +873,39 @@ function check_if_last_post_of_thread($thread_id)
  * @param $content what is it that we want to make (in)visible: forum category, forum, thread, post
  * @param $id the id of the content we want to make invisible
  * @param $current_visibility_status what is the current status of the visibility (0 = invisible, 1 = visible)
+ * @param string $additional_url_parameters
+ * @param int $return
  * @return void string HTML
  *
  * @author Patrick Cool <patrick.cool@UGent.be>, Ghent University
- * @version february 2006, dokeos 1.8
+ * @version february 2014, chamilo 1.9.8
  */
-function display_visible_invisible_icon($content, $id, $current_visibility_status, $additional_url_parameters = '')
+function display_visible_invisible_icon($content, $id, $current_visibility_status, $additional_url_parameters = '', $return = 0)
 {
     $id = Security::remove_XSS($id);
+    $html = '';
     if ($current_visibility_status == '1') {
-        echo '<a href="'.api_get_self().'?'.api_get_cidreq().'&';
+        $html .= '<a href="'.api_get_self().'?'.api_get_cidreq().'&';
         if (is_array($additional_url_parameters)) {
             foreach ($additional_url_parameters as $key => $value) {
-                echo $key.'='.$value.'&amp;';
+                $html .= $key.'='.$value.'&';
             }
         }
-        echo 'action=invisible&amp;content='.$content.'&amp;id='.$id.'">'.Display::return_icon('visible.png', get_lang('MakeInvisible'), array(), ICON_SIZE_SMALL).'</a>';
+        $html .= 'action=invisible&content='.$content.'&id='.$id.'">'.Display::return_icon('visible.png', get_lang('MakeInvisible'), array(), ICON_SIZE_SMALL).'</a>';
     }
     if ($current_visibility_status == '0') {
-        echo '<a href="'.api_get_self().'?'.api_get_cidreq().'&amp;';
+        $html .= '<a href="' . api_get_self() . '?' . api_get_cidreq() . '&';
         if (is_array($additional_url_parameters)) {
             foreach ($additional_url_parameters as $key => $value) {
-                echo $key.'='.$value.'&amp;';
+                $html .= $key.'='.$value.'&';
             }
         }
-        echo 'action=visible&amp;content='.$content.'&amp;id='.$id.'">'.Display::return_icon('invisible.png', get_lang('MakeVisible'), array(), ICON_SIZE_SMALL).'</a>';
+        $html .= 'action=visible&content='.$content.'&id='.$id.'">'.Display::return_icon('invisible.png', get_lang('MakeVisible'), array(), ICON_SIZE_SMALL).'</a>';
+    }
+    if ($return == 0) {
+        echo $html;
+    } else {
+        return $html;
     }
 }
 
@@ -4689,15 +4720,16 @@ function _phorum_recursive_sort($rows, &$threads, $seed = 0, $indent = 0)
 }
 
 /**
- * Return HTML for specified action type
+ * Return HTML link for specified action type
  * @param $type
  * @param $forumId
  * @param $threadId
  * @param $postId
  * @param null $origin
+ * @param string $visible
  * @return string
  */
-function getPostAction($type, $forumId, $threadId, $postId, $origin = null)
+function getPostAction($type, $forumId, $threadId, $postId, $origin = null, $visible = '0')
 {
 
     $html = '';
@@ -4708,10 +4740,40 @@ function getPostAction($type, $forumId, $threadId, $postId, $origin = null)
     if (!empty($type) && is_string($type)) {
         switch ($type) {
             case 'delete' :
+                $html .= "<a href=\"" . api_get_self() . "?" . api_get_cidreq() . "&forum=" . $forumId .
+                    "&thread=" . $threadId . "&action=delete&content=post&id=" . $postId .
+                    "&origin=" . $origin . "\" onclick=\"javascript:if(!confirm('" .
+                    addslashes(api_htmlentities(get_lang('DeletePost'), ENT_QUOTES)) . "')) return false;\">" .
+                    Display::return_icon(
+                        'delete.png',
+                        get_lang('Delete'),
+                        array(),
+                        ICON_SIZE_SMALL
+                    ) . "</a>";
                 break;
             case 'edit' :
+                $html .= "<a href=\"editpost.php?" . api_get_cidreq() . "&gidReq=" .
+                    Security::remove_XSS($_GET['gidReq']) . "&forum=" . $forumId .
+                    "&thread=" . $threadId . "&post=" . $postId . "&origin=" . $origin .
+                    "&edit=edition\">" .
+                    Display::return_icon(
+                        'edit.png',
+                        get_lang('Edit'),
+                        array(),
+                        ICON_SIZE_SMALL
+                    ) . "</a>";
                 break;
             case 'hide' :
+                $html .= display_visible_invisible_icon('post',
+                    $postId,
+                    $visible,
+                    array(
+                        'forum' => $forumId,
+                        'thread' => $threadId,
+                        'origin' => $origin
+                    ),
+                    1
+                );
                 break;
             case 'reply' :
                 $html .= '<a class="postActionReply" href="reply.php?' . api_get_cidreq() . '&forum=' . $forumId .
@@ -4719,6 +4781,10 @@ function getPostAction($type, $forumId, $threadId, $postId, $origin = null)
                 Display::return_icon('message_reply_forum.png', get_lang('ReplyToMessage'))."</a>";
                 break;
             case 'quote' :
+                $html .= '<a href="reply.php?' . api_get_cidreq() . '&forum=' . $forumId .
+                    '&thread=' . $threadId . '&post=' . $postId .
+                    '&action=quote&origin=' . $origin . '">' .
+                    Display::return_icon('quote.gif', get_lang('QuoteMessage')) . "</a>";
                 break;
             default :
                 break;
@@ -4726,3 +4792,237 @@ function getPostAction($type, $forumId, $threadId, $postId, $origin = null)
     }
     return $html;
 }
+
+/**
+ * Return Post Html
+ * @param $forumId
+ * @param $threadId
+ * @param $row
+ * @param $origin
+ * @param int $position
+ * @return string
+ */
+function getPostPrototype($forumId, $threadId, $row, $origin, $position = 0) {
+    global $_user;
+    $html = '';
+    $forumId = intval($forumId);
+    $threadId = intval($threadId);
+    $postId = intval($row['post_id']);
+    $visible = intval($row['visible']);
+    $position = intval($position);
+    $current_forum = get_forum_information($forumId);
+    $current_forum_category = get_forumcategory_information($current_forum['forum_category']);
+    $current_thread = get_thread_information($threadId);
+    $locked = api_resource_is_locked_by_gradebook($threadId, LINK_FORUM_THREAD);
+    $html.= '<table width="100%" class="forum_table" cellspacing="5" border="0" data-post-id="$postId">';
+    // the style depends on the status of the message: approved or not
+    if ($row['visible'] == '0') {
+        $titleclass = 'forum_message_post_title_2_be_approved';
+        $messageclass = 'forum_message_post_text_2_be_approved';
+        $leftclass = 'forum_message_left_2_be_approved';
+    } else {
+        $titleclass = 'forum_message_post_title';
+        $messageclass = 'forum_message_post_text';
+        $leftclass = 'forum_message_left';
+    }
+    $html .= "<tr>";
+    $html .= "<td rowspan=\"3\" class=\"$leftclass\">";
+
+    if ($row['user_id'] == '0') {
+        $name = prepare4display($row['poster_name']);
+    } else {
+        $name = api_get_person_name($row['firstname'], $row['lastname']);
+    }
+    $username = sprintf(get_lang('LoginX'), $row['username']);
+
+    if ($origin != 'learnpath') {
+        if (api_get_course_setting('allow_user_image_forum')) {
+            $html .= '<br />' . display_user_image($row['user_id'], $name) . '<br />';
+        }
+        $html .= display_user_link(
+                $row['user_id'],
+                $name,
+                '',
+                $username
+            ) . '<br />';
+    } else {
+        $html .= Display::tag('span',
+                $name,
+                array(
+                    'title' => api_htmlentities(
+                        $username,
+                        ENT_QUOTES
+                    )
+                )
+            ) . '<br />';
+    }
+
+    $group_id = api_get_group_id();
+
+    $html .= api_convert_and_format_date($row['post_date']) . '<br /><br />';
+    // get attach id
+    $attachment_list = get_attachment($postId);
+    $id_attach = !empty($attachment_list) ? $attachment_list['id'] : '';
+    // The user who posted it can edit his thread
+    // only if the course admin allowed this in the properties of the forum.
+    // The course admin him/herself can do this off course always.
+    if ( GroupManager::is_tutor_of_group(api_get_user_id(), $group_id) ||
+        ($current_forum['allow_edit'] == 1 && $row['user_id'] == $_user['user_id']) ||
+        (api_is_allowed_to_edit(false, true)  && !(api_is_course_coach() &&
+                $current_forum['session_id'] != $_SESSION['id_session']))) {
+        if (api_is_allowed_to_session_edit(false, true)) {
+            if ($locked == false) {
+                $html .= getPostAction('edit', $forumId, $threadId, $postId, $origin, $visible);
+            }
+        }
+    }
+
+    if ($origin != 'learnpath') {
+        if (GroupManager::is_tutor_of_group(api_get_user_id(), $group_id) ||
+            api_is_allowed_to_edit(false, true) && !(api_is_course_coach() &&
+                $current_forum['session_id'] != $_SESSION['id_session'])) {
+            if ($locked == false) {
+                $html .= getPostAction('delete', $forumId, $threadId, $postId, $origin, $visible);
+            }
+        }
+        if (api_is_allowed_to_edit(false,true) && !(api_is_course_coach() &&
+                $current_forum['session_id'] != $_SESSION['id_session'])) {
+            $html .= getPostAction('hide', $forumId, $threadId, $postId, $origin, $visible);
+            $html .= "";
+            if ($position > 0) {
+                $html .= "<a href=\"viewthread.php?" . api_get_cidreq() . "&forum=" . $forumId .
+                    "&thread=" . $threadId . "&action=move&post=" . $postId .
+                    "&origin=" . $origin . "\">".
+                    Display::return_icon(
+                        'move.png',
+                        get_lang('MovePost'),
+                        array(),
+                        ICON_SIZE_SMALL
+                    ) . "</a>";
+            }
+        }
+    }
+
+    $user_status = api_get_status_of_user_in_course($row['user_id'], api_get_course_id());
+    $current_qualify_thread = show_qualify('1', $row['poster_id'], $_GET['thread']);
+
+    if (api_is_allowed_to_edit(null, true) && $origin != 'learnpath') {
+        if ($position > 0 && $locked == false) {
+            $html .= "<a href=\"forumqualify.php?" . api_get_cidreq() . "&forum=" . $forumId .
+                "&thread=" . $threadId . "&action=list&post=" . $postId .
+                "&user=" . $row['poster_id'] . "&user_id=" . $row['poster_id'] .
+                "&origin=" . $origin . "&idtextqualify=" . $current_qualify_thread .
+                "&gradebook=" . Security::remove_XSS($_GET['gradebook']) . "\" >" .
+                Display::return_icon('quiz.gif', get_lang('Qualify')) . "</a> ";
+        }
+    }
+
+    if (($current_forum_category && $current_forum_category['locked'] == 0) &&
+        $current_forum['locked'] == 0 && $current_thread['locked'] == 0 ||
+        api_is_allowed_to_edit(false, true)) {
+        if ($_user['user_id'] ||
+            ($current_forum['allow_anonymous'] == 1 &&
+                !$_user['user_id'])) {
+            if (!api_is_anonymous() && api_is_allowed_to_session_edit(false, true)) {
+                $html .= getPostAction(
+                    'reply',
+                    $forumId,
+                    $threadId,
+                    $postId,
+                    $origin
+                );
+                $html .= getPostAction(
+                    'quote',
+                    $forumId,
+                    $threadId,
+                    $postId,
+                    $origin,
+                    $visible
+                );
+            }
+        }
+    } else {
+        if ($current_forum_category && $current_forum_category['locked'] == 1) {
+            $html .= get_lang('ForumcategoryLocked') . '<br />';
+        }
+        if ($current_forum['locked'] == 1) {
+            $html .= get_lang('ForumLocked') . '<br />';
+        }
+        if ($current_thread['locked'] == 1) {
+            $html .= get_lang('ThreadLocked') . '<br />';
+        }
+    }
+    $html .= "</td>";
+    // prepare the notification icon
+    if (isset($whatsnew_post_info[$forumId][$threadId][$postId]) &&
+        !empty($whatsnew_post_info[$forumId][$threadId][$postId])) {
+        $post_image = Display::return_icon('forumpostnew.gif');
+    } else {
+        $post_image = Display::return_icon('forumpost.gif');
+    }
+    if ($row['post_notification'] == '1' AND $row['poster_id'] == $_user['user_id']) {
+        $post_image .= Display::return_icon('forumnotification.gif', get_lang('YouWillBeNotified'));
+    }
+    // The post title
+
+    $html .= "</tr>";
+
+    //  The post title
+    $html .= "<tr>";
+    $html .= Display::tag(
+        'td',
+        prepare4display($row['post_title']),
+        array('class' => 'forum_message_post_title')
+    );
+    $html .= "</tr>";
+
+    // The post message
+    $html .= "<tr>";
+
+    // see comments inside forumfunction.inc.php to lower filtering and allow more visual changes
+    $html .= "<td class=\"$messageclass\">" . prepare4display($row['post_text']) . "</td>";
+    $html .= "</tr>";
+
+    // The check if there is an attachment
+
+    $attachment_list = get_attachment($postId);
+    if (!empty($attachment_list)) {
+        $html .= '<tr><td colspan="2" height="50%">';
+        $realname = $attachment_list['path'];
+        $user_filename = $attachment_list['filename'];
+
+        $html .= Display::return_icon('attachment.gif', get_lang('Attachment'));
+        $html .= '<a href="download.php?file=' . $realname . '"> ' . $user_filename . ' </a>';
+
+        if (($current_forum['allow_edit'] == 1 && $row['user_id'] == $_user['user_id']) ||
+            (api_is_allowed_to_edit(false, true)  && !(api_is_course_coach() &&
+                    $current_forum['session_id'] != $_SESSION['id_session'])))	{
+            $html .= '&nbsp;&nbsp;<a href="' . api_get_self() . '?' . api_get_cidreq() .
+                '&origin=' . Security::remove_XSS($_GET['origin']) .
+                '&action=delete_attach&id_attach=' . $attachment_list['id'] .
+                '&forum=' . $forumId . '&thread=' .$threadId .
+                '" onclick="javascript:if(!confirm(\'' .
+                addslashes(api_htmlentities(
+                    get_lang('ConfirmYourChoice'),
+                    ENT_QUOTES
+                )).'\')) return false;">'.
+                Display::return_icon(
+                    'delete.png',
+                    get_lang('Delete'),
+                    array(),
+                    ICON_SIZE_SMALL
+                ).'</a><br />';
+        }
+        $html .= '<span class="forum_attach_comment" >' . $attachment_list['comment'] . '</span>';
+        $html .= '</td></tr>';
+    }
+
+    // The post has been displayed => it can be removed from the what's new array
+    unset($whatsnew_post_info[$current_forum['forum_id']][$current_thread['thread_id']][$postId]);
+    unset($whatsnew_post_info[$current_forum['forum_id']][$current_thread['thread_id']]);
+    unset($_SESSION['whatsnew_post_info'][$current_forum['forum_id']][$current_thread['thread_id']][$postId]);
+    unset($_SESSION['whatsnew_post_info'][$current_forum['forum_id']][$current_thread['thread_id']]);
+    $html .= "</table>";
+
+    return $html;
+};

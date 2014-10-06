@@ -212,18 +212,34 @@ if ($my_message != 'PostDeletedSpecial') {
 /* FORM PRTOTYPE */
 
 $values = show_add_post_form($current_forum, $forum_setting, 'replymessage', -1, null, false);
-if (!empty($values) AND isset($_POST['SubmitPost'])) {
+if (!empty($values) && isset($_POST['SubmitPost'])) {
     $result = store_reply($current_forum, $values);
     //@todo split the show_add_post_form function
 
-    $url = 'viewthread.php?forum='.$current_forum['forum_id'].'&gradebook='.$gradebook.'&thread='.intval($_GET['thread']).'&gidReq='.api_get_group_id().'&origin='.$origin.'&msg='.$result['msg'].'&type='.$result['type'];
+    $url = 'viewthread.php?forum=' . $current_forum['forum_id'] . '&gradebook=' . $gradebook .
+        '&thread=' . intval($_GET['thread']) . '&gidReq=' . api_get_group_id() .
+        '&origin=' . $origin . '&msg=' . $result['msg'] . '&type=' . $result['type'];
     echo '
     <script>
-    window.location = "'.$url.'";
+    window.location = "' . $url . '";
     </script>';
 }
+$posts = get_posts(intval($_GET['thread']));
+$firstPost = $posts[0];
 echo Display::div($values, array('style' => 'display: none', 'id' => 'replyFormPrototype'));
-
+echo Display::div(
+    getPostPrototype(
+        $current_forum['forum_id'],
+        intval($_GET['thread']),
+        $firstPost,
+        $origin,
+        1
+    ),
+    array(
+        'style' => 'display: true;',
+        'id' => 'replyPostPrototype'
+    )
+);
 
 /* FOOTER */
 
