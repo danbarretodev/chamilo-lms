@@ -236,7 +236,7 @@ echo Display::div(
         1
     ),
     array(
-        'style' => 'display: true;',
+        'style' => 'display: none;',
         'id' => 'replyPostPrototype'
     )
 );

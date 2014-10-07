@@ -79,28 +79,32 @@ function getReplyForm (postId, postTitle) {
         threadForm.append($(\'<input type="hidden" value="\' + postId + \'" name="post_parent_id">\'));
     }
     threadForm.find("input[name=\'post_title\']").val(postTitle);
-    replyForm.slideUp();
+    replyForm.slideUp("fast");
 
     return replyForm;
 }
 
 function sendReplyMessage () {
     return false;
-    .ajax({
-        type: "POST",
-        url: "forum.ajax.php",
-        data: {
+    $(document).on("click", "#replyForm button[name=\'SubmitPost\']", function (event) {
+        event.preventDefault;
+        event.stopPropagation;
+        $.ajax({
+            type: "POST",
+            url: "forum.ajax.php",
+            data: {
 
-        }
-        done: function(data) {
-            if (data.error) {
-                alert(data.errorMessage);
-            } else {
+            },
+            done: function(data) {
+                if (data.error) {
+                    alert(data.errorMessage);
+                } else {
 
-
+                }
             }
-        }
+        });
     });
+
 }
 
 </script>';
@@ -4721,15 +4725,16 @@ function _phorum_recursive_sort($rows, &$threads, $seed = 0, $indent = 0)
 
 /**
  * Return HTML link for specified action type
- * @param $type
- * @param $forumId
- * @param $threadId
- * @param $postId
- * @param null $origin
- * @param string $visible
+ * @param $type Values: delete, edit, hide, move, qualify, quote, reply
+ * @param $forumId Fourm ID
+ * @param $threadId Thread ID
+ * @param $postId Post ID where it contains action
+ * @param null $origin Where is used the Forum tool
+ * @param array $extra Array for extra params
+ * @internal param string $visible
  * @return string
  */
-function getPostAction($type, $forumId, $threadId, $postId, $origin = null, $visible = '0')
+function getPostAction($type, $forumId, $threadId, $postId, $origin = null, $extra = array())
 {
 
     $html = '';
@@ -4737,6 +4742,18 @@ function getPostAction($type, $forumId, $threadId, $postId, $origin = null, $vis
     $threadId = intval($threadId);
     $postId = intval($postId);
     $origin = htmlentities($origin);
+    if (!empty($extra) && is_array($extra)) {
+        $visible = isset($extra['visible']) ?
+            Security::remove_XSS($extra['visible']) :
+            null;
+        $current_qualify_thread = isset($extra['currentQualifyThread']) ?
+            Security::remove_XSS($extra['currentQualifyThread']) :
+            null;
+        $posterId = isset($extra['posterId']) ?
+            Security::remove_XSS($extra['posterId']) :
+            null;
+    }
+
     if (!empty($type) && is_string($type)) {
         switch ($type) {
             case 'delete' :
@@ -4775,16 +4792,35 @@ function getPostAction($type, $forumId, $threadId, $postId, $origin = null, $vis
                     1
                 );
                 break;
-            case 'reply' :
-                $html .= '<a class="postActionReply" href="reply.php?' . api_get_cidreq() . '&forum=' . $forumId .
-                '&thread=' . $threadId .'&post='. $postId .'&action=replymessage&origin=' . $origin . '">'.
-                Display::return_icon('message_reply_forum.png', get_lang('ReplyToMessage'))."</a>";
+            case 'move' :
+                $html .= "<a href=\"viewthread.php?" . api_get_cidreq() . "&forum=" . $forumId .
+                    "&thread=" . $threadId . "&action=move&post=" . $postId .
+                    "&origin=" . $origin . "\">".
+                    Display::return_icon(
+                        'move.png',
+                        get_lang('MovePost'),
+                        array(),
+                        ICON_SIZE_SMALL
+                    ) . "</a>";
+                break;
+            case 'qualify' :
+                $html .= "<a href=\"forumqualify.php?" . api_get_cidreq() . "&forum=" . $forumId .
+                    "&thread=" . $threadId . "&action=list&post=" . $postId .
+                    "&user=" . $posterId . "&user_id=" . $posterId .
+                    "&origin=" . $origin . "&idtextqualify=" . $current_qualify_thread .
+                    "&gradebook=" . Security::remove_XSS($_GET['gradebook']) . "\" >" .
+                    Display::return_icon('quiz.gif', get_lang('Qualify')) . "</a> ";
                 break;
             case 'quote' :
                 $html .= '<a href="reply.php?' . api_get_cidreq() . '&forum=' . $forumId .
                     '&thread=' . $threadId . '&post=' . $postId .
                     '&action=quote&origin=' . $origin . '">' .
                     Display::return_icon('quote.gif', get_lang('QuoteMessage')) . "</a>";
+                break;
+            case 'reply' :
+                $html .= '<a class="postActionReply" href="reply.php?' . api_get_cidreq() . '&forum=' . $forumId .
+                    '&thread=' . $threadId .'&post='. $postId .'&action=replymessage&origin=' . $origin . '">'.
+                    Display::return_icon('message_reply_forum.png', get_lang('ReplyToMessage'))."</a>";
                 break;
             default :
                 break;
@@ -4795,6 +4831,7 @@ function getPostAction($type, $forumId, $threadId, $postId, $origin = null, $vis
 
 /**
  * Return Post Html
+ * Is used to build threads
  * @param $forumId
  * @param $threadId
  * @param $row
@@ -4872,7 +4909,16 @@ function getPostPrototype($forumId, $threadId, $row, $origin, $position = 0) {
                 $current_forum['session_id'] != $_SESSION['id_session']))) {
         if (api_is_allowed_to_session_edit(false, true)) {
             if ($locked == false) {
-                $html .= getPostAction('edit', $forumId, $threadId, $postId, $origin, $visible);
+                $html .= getPostAction(
+                    'edit',
+                    $forumId,
+                    $threadId,
+                    $postId,
+                    $origin,
+                    array(
+                        'visible' => $visible,
+                    )
+                );
             }
         }
     }
@@ -4882,38 +4928,62 @@ function getPostPrototype($forumId, $threadId, $row, $origin, $position = 0) {
             api_is_allowed_to_edit(false, true) && !(api_is_course_coach() &&
                 $current_forum['session_id'] != $_SESSION['id_session'])) {
             if ($locked == false) {
-                $html .= getPostAction('delete', $forumId, $threadId, $postId, $origin, $visible);
+                $html .= getPostAction(
+                    'delete',
+                    $forumId,
+                    $threadId,
+                    $postId,
+                    $origin,
+                    array(
+                        'visible' => $visible,
+                    )
+                );
             }
         }
         if (api_is_allowed_to_edit(false,true) && !(api_is_course_coach() &&
                 $current_forum['session_id'] != $_SESSION['id_session'])) {
-            $html .= getPostAction('hide', $forumId, $threadId, $postId, $origin, $visible);
-            $html .= "";
+            $html .= getPostAction(
+                'hide',
+                $forumId,
+                $threadId,
+                $postId,
+                $origin,
+                array(
+                    'visible' => $visible,
+                )
+            );
             if ($position > 0) {
-                $html .= "<a href=\"viewthread.php?" . api_get_cidreq() . "&forum=" . $forumId .
-                    "&thread=" . $threadId . "&action=move&post=" . $postId .
-                    "&origin=" . $origin . "\">".
-                    Display::return_icon(
-                        'move.png',
-                        get_lang('MovePost'),
-                        array(),
-                        ICON_SIZE_SMALL
-                    ) . "</a>";
+                $html .= getPostAction(
+                    'move',
+                    $forumId,
+                    $threadId,
+                    $postId,
+                    $origin,
+                    array(
+                        'visible' => $visible,
+                    )
+                );
             }
         }
     }
 
     $user_status = api_get_status_of_user_in_course($row['user_id'], api_get_course_id());
-    $current_qualify_thread = show_qualify('1', $row['poster_id'], $_GET['thread']);
+    $currentQualifyThread = show_qualify('1', $row['poster_id'], $_GET['thread']);
 
     if (api_is_allowed_to_edit(null, true) && $origin != 'learnpath') {
         if ($position > 0 && $locked == false) {
-            $html .= "<a href=\"forumqualify.php?" . api_get_cidreq() . "&forum=" . $forumId .
-                "&thread=" . $threadId . "&action=list&post=" . $postId .
-                "&user=" . $row['poster_id'] . "&user_id=" . $row['poster_id'] .
-                "&origin=" . $origin . "&idtextqualify=" . $current_qualify_thread .
-                "&gradebook=" . Security::remove_XSS($_GET['gradebook']) . "\" >" .
-                Display::return_icon('quiz.gif', get_lang('Qualify')) . "</a> ";
+            $html .= getPostAction(
+                'qualify',
+                $forumId,
+                $threadId,
+                $postId,
+                $origin,
+                array(
+                    'visible' => $visible,
+                    'currentQualifyThread' => $currentQualifyThread,
+                    'posterId' => $row['poster_id'],
+                )
+            );
         }
     }
 
@@ -4929,7 +4999,10 @@ function getPostPrototype($forumId, $threadId, $row, $origin, $position = 0) {
                     $forumId,
                     $threadId,
                     $postId,
-                    $origin
+                    $origin,
+                    array(
+                        'visible' => $visible,
+                    )
                 );
                 $html .= getPostAction(
                     'quote',
@@ -4937,7 +5010,9 @@ function getPostPrototype($forumId, $threadId, $row, $origin, $position = 0) {
                     $threadId,
                     $postId,
                     $origin,
-                    $visible
+                    array(
+                        'visible' => $visible,
+                    )
                 );
             }
         }
