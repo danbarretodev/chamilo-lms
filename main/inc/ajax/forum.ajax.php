@@ -57,8 +57,69 @@ if (!empty($action)) {
                         break;
                     }
                     Security::clear_token();
-                    $result = store_reply($current_forum, $_REQUEST);
+                    $result = store_reply($current_forum, $_REQUEST, true);
                     $json['result'] = print_r($result,1);
+                    if ($result['type'] === 'error') {
+                        $json['errorMessage'] = $result['msg'];
+                    } elseif(!empty($result['id'])) {
+                        $json = array_merge($json, $result);
+                        $json['error'] = false;
+                        $post = get_post_information($result['id']);
+
+                        $indent = isset($_REQUEST['parentIndent']) ?
+                            intval($_REQUEST['parentIndent']) + 20 :
+                            0 ;
+                        $origin = isset($_REQUEST['origin']) ?
+                            Security::remove_XSS($_REQUEST['origin']) :
+                            '';
+                        switch ($_REQUEST['view']) {
+                            case 'threaded' :
+                                $json['html'] = Display::div(
+                                    Display::return_icon('forumpostnew.gif') .
+                                    '<a href="viewthread.php?' .
+                                    api_get_cidreq() .
+                                    '&forum=' . $post['forum_id'] .
+                                    '&thread=' . $post['thread_id'] .
+                                    '&post=' . $post['post_id'] .
+                                    '&origin=' . $origin .'>' .
+                                    prepare4display($post['post_title']) .
+                                    '</a></div>',
+                                    array(
+                                        'style' => 'margin-left: ' .
+                                            $indent . 'px;'
+                                    )
+                                );
+                                break;
+                            case 'nested' :
+                                $json['html'] = Display::div(
+                                    $json['html'] = getPostPrototype(
+                                        $post['forum_id'],
+                                        $post['thread_id'],
+                                        $post,
+                                        $origin,
+                                        4
+                                    ),
+                                    array(
+                                        'style' => 'margin-left: ' .
+                                            $indent . 'px;'
+                                    )
+                                );
+                                break;
+                            case 'flat' :
+                                //no break
+                            default :
+                                $json['html'] = getPostPrototype(
+                                    $post['forum_id'],
+                                    $post['thread_id'],
+                                    $post,
+                                    $origin,
+                                    4
+                                );
+                                // nothing more to do
+                                break;
+                        }
+
+                    }
                 }
             }
             break;

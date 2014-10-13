@@ -209,7 +209,7 @@ if ($my_message != 'PostDeletedSpecial') {
     }
 }
 
-/* FORM PRTOTYPE */
+/* FORM PROTOTYPE */
 
 $values = show_add_post_form($current_forum, $forum_setting, 'replymessage', -1, null, false);
 if (!empty($values) && isset($_POST['SubmitPost'])) {
@@ -225,19 +225,36 @@ if (!empty($values) && isset($_POST['SubmitPost'])) {
     </script>';
 }
 $posts = get_posts(intval($_GET['thread']));
-$firstPost = $posts[0];
 echo Display::div($values, array('style' => 'display: none', 'id' => 'replyFormPrototype'));
 echo Display::div(
-    getPostPrototype(
-        $current_forum['forum_id'],
-        intval($_GET['thread']),
-        $firstPost,
-        $origin,
-        1
+    Display::div(
+        Display::div(
+            get_lang('Quoting') . ' %quoteUser% :' .
+            Display::div(
+                '%quoteContent%',
+                array(
+                    'style' =>
+                        'color: #006600;
+                        font-size: 90%;
+                        font-style: italic;
+                        background-color: #FAFAFA;
+                        border: #D1D7DC 1px solid;
+                        padding: 3px;',
+                    'class' => 'quoteContent',
+                )
+            ),
+            array(
+                'style' => 'font-size: 90%; font-style: italic;',
+                'class' => 'quoteUser',
+            )
+        ),
+        array(
+            'style' => 'margin: 5px;',
+        )
     ),
     array(
-        'style' => 'display: none;',
-        'id' => 'replyPostPrototype'
+        'style' => 'display: none',
+        'id' => 'quoteMessagePrototype',
     )
 );
 

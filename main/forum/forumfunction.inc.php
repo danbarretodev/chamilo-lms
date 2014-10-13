@@ -36,23 +36,35 @@ function setFocus(){
 }
 $(document).ready(function () {
     setFocus();
-    addReply();
-    sendReplyMessage();
+    registerReply();
 });
 </script>';
 
 $htmlHeadXtra[] = '<script type = "text/javascript">
-function addReply() {
-    $(document).on("click", ".postActionReply", function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        var postHtml = $(this).closest(".forum_table");
-        var postId = postHtml.data("post-id");
-        var postTitle = postHtml.find(".forum_message_post_title").html();
-        var replyForm = getReplyForm(postId, postTitle);
-        postHtml.after(replyForm);
-        replyForm.slideDown("slow");
-    });
+function addReply(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    var postHtml = $(this).closest(".forum_table");
+    var postId = postHtml.data("post-id");
+    var postTitle = postHtml.find(".forum_message_post_title").html();
+    var postText = "";
+    if ($(this).attr("class") == "postActionQuote") {
+        var quoteUser = $(this).closest("td").children("a").eq(1).html();
+        var quoteContent = $(this).closest("tbody").find(".forum_message_post_text").html();
+        postText = $("#quoteMessagePrototype").html();
+        postText = postText.replace("%quoteUser%", quoteUser);
+        postText = postText.replace("%quoteContent%", quoteContent);
+        console.log(postText);
+    }
+    var replyForm = getReplyForm(postId, postTitle, postText);
+    postHtml.after(replyForm);
+    replyForm.slideDown("slow");
+}
+
+function registerReply() {
+    $(document).on("click", ".postActionReply", addReply);
+    $(document).on("click", ".postActionQuote", addReply);
+    sendReplyMessage();
 }
 
 function deleteReply (postId) {
@@ -63,7 +75,7 @@ function deleteReply (postId) {
     });
 }
 
-function getReplyForm (postId, postTitle) {
+function getReplyForm (postId, postTitle, postText) {
     var replyForm
     if ($("#replyForm").length > 0) {
         replyForm = $("#replyForm");
@@ -71,7 +83,7 @@ function getReplyForm (postId, postTitle) {
         replyForm = $("#replyFormPrototype").clone();
         replyForm.attr("id", "replyForm");
     }
-    var postTitle = "Re:" + postTitle;
+    var postTitle = "'.get_lang('ReplyShort').'" + postTitle;
     var threadForm = replyForm.find("#thread");
     if (threadForm.find("input[name=\'post_parent_id\']").length > 0) {
         threadForm.find("input[name=\'post_parent_id\']").val(postId);
@@ -79,32 +91,86 @@ function getReplyForm (postId, postTitle) {
         threadForm.append($(\'<input type="hidden" value="\' + postId + \'" name="post_parent_id">\'));
     }
     threadForm.find("input[name=\'post_title\']").val(postTitle);
+    threadForm.find("#post_text").val(postText);
     replyForm.slideUp("fast");
 
     return replyForm;
 }
 
 function sendReplyMessage () {
-    return false;
     $(document).on("click", "#replyForm button[name=\'SubmitPost\']", function (event) {
         event.preventDefault;
         event.stopPropagation;
+        var postForm = $(this).closest("#thread");
+        var params = postForm.attr("action");
+        params = params.substr(params.indexOf("?"))
         $.ajax({
             type: "POST",
-            url: "forum.ajax.php",
-            data: {
-
-            },
+            url: "' . api_get_path(WEB_AJAX_PATH) .
+                'forum.ajax.php" + params +
+                "&view=' . $_REQUEST['view'] .
+                '&parentIdent=" +
+                $("#replyForm").siblings("div[data-post-id=' .
+                $_REQUEST['post'] .
+                '").css("margin-left").replace("px", ""),
+            data: getReplyData,
             done: function(data) {
                 if (data.error) {
                     alert(data.errorMessage);
                 } else {
-
+                    $("#replyForm").hide();
+                    getReplyPost(data);
                 }
             }
         });
     });
 
+}
+
+function getReplyData() {
+    var string = "";
+    object = {};
+    $("#replyForm").find("input").map(
+        function(index){
+            var name = $(this).attr("name");
+            var value = $(this).val();
+            object[name] = value;
+        }
+    );
+    return object;
+}
+
+function getReplyPost(data) {
+    if (checkReplyPost(data)) {
+        var view = "' . $_REQUEST['view'] . '";
+        var parentPost;
+        switch (view) {
+            case "threaded" :
+                parentPost = $("#main_content").find("div[data-post-id=data.parentId]");
+                break;
+            case "nested" :
+                parentPost = $("#main_content").find("table[data-post-id=data.parentId]").closest("div");
+                break;
+            case "flat" :
+                //no break
+            default :
+                parentPost = $("#main_content").find("table[data-post-id=data.parentId]")
+                break;
+        }
+        parentPost.after(data.html);
+    }
+    return "";
+}
+
+function checkReplyPost(data) {
+    if (
+        data.hasOwnProperty("parentId") &&
+        data.hasOwnProperty("id") &&
+        data.hasOwnProperty("html")
+    ) {
+        return true;
+    }
+    return false;
 }
 
 </script>';
@@ -2293,7 +2359,8 @@ function show_add_post_form($current_forum, $forum_setting, $action = '', $id = 
 {
     $_user = api_get_user_info();
     $gradebook = isset($_GET['gradebook']) ? Security::remove_XSS($_GET['gradebook']) : null;
-    $action = isset($_GET['action']) ? Security::remove_XSS($_GET['action']) : null;
+    $action = isset($_GET['action']) ? Security::remove_XSS($_GET['action']) :
+        !empty($action) ? Security::remove_XSS($action) : null;
 
     // Setting the class and text of the form title and submit button.
     if ($action == 'quote') {
@@ -2311,9 +2378,11 @@ function show_add_post_form($current_forum, $forum_setting, $action = '', $id = 
     }
 
     // Initialize the object.
-    $my_thread = isset($_GET['thread']) ? $_GET['thread'] : '';
-    $my_forum = isset($_GET['forum']) ? $_GET['forum'] : '';
-    $my_post = isset($_GET['post']) ? $_GET['post'] : '';
+    $my_thread = isset($_GET['thread']) ? intval($_GET['thread']) : '';
+    $my_forum = isset($_GET['forum']) ? intval($_GET['forum']) : '';
+    $my_post = isset($_GET['post']) ? intval($_GET['post']) :
+        !empty($id) ? intval($id) : '';
+
     $my_gradebook = isset($_GET['gradebook']) ? Security::remove_XSS($_GET['gradebook']) : '';
     $form = new FormValidator(
         'thread',
@@ -2663,12 +2732,14 @@ function current_qualify_of_thread($thread_id, $session_id)
 /**
  * This function stores a reply in the forum_post table.
  * It also updates the forum_threads table (thread_replies +1 , thread_last_post, thread_date)
- * @param array
- * @param array
+ * @param array $current_forum
+ * @param array $values
+ * @param int $returnData
+ * @return array
  * @author Patrick Cool <patrick.cool@UGent.be>, Ghent University
- * @version february 2006, dokeos 1.8
+ * @version october 2014, chamilo 1.9.8
  */
-function store_reply($current_forum, $values)
+function store_reply($current_forum, $values, $returnData = 0)
 {
     $_course = api_get_course_info();
     $forum_table_attachment = Database :: get_course_table(TABLE_FORUM_ATTACHMENT);
@@ -2768,6 +2839,11 @@ function store_reply($current_forum, $values)
         Session::erase('addedresourceid');
         $return['msg'] = $message;
         $return['type'] = 'confirmation';
+
+        if ($returnData) {
+            $return['id'] = $new_post_id;
+            $return['parentId'] = $values['post_parent_id'];
+        }
 
     } else {
         $return['msg'] = get_lang('UplNoFileUploaded').' '.get_lang('UplSelectFileFirst');
@@ -4812,7 +4888,7 @@ function getPostAction($type, $forumId, $threadId, $postId, $origin = null, $ext
                     Display::return_icon('quiz.gif', get_lang('Qualify')) . "</a> ";
                 break;
             case 'quote' :
-                $html .= '<a href="reply.php?' . api_get_cidreq() . '&forum=' . $forumId .
+                $html .= '<a class="postActionQuote" href="reply.php?' . api_get_cidreq() . '&forum=' . $forumId .
                     '&thread=' . $threadId . '&post=' . $postId .
                     '&action=quote&origin=' . $origin . '">' .
                     Display::return_icon('quote.gif', get_lang('QuoteMessage')) . "</a>";
@@ -4851,7 +4927,8 @@ function getPostPrototype($forumId, $threadId, $row, $origin, $position = 0) {
     $current_forum_category = get_forumcategory_information($current_forum['forum_category']);
     $current_thread = get_thread_information($threadId);
     $locked = api_resource_is_locked_by_gradebook($threadId, LINK_FORUM_THREAD);
-    $html.= '<table width="100%" class="forum_table" cellspacing="5" border="0" data-post-id="$postId">';
+    $html.= '<table width="100%" class="forum_table" ' .
+        'cellspacing="5" border="0" data-post-id="' . $postId . '">';
     // the style depends on the status of the message: approved or not
     if ($row['visible'] == '0') {
         $titleclass = 'forum_message_post_title_2_be_approved';
@@ -4874,14 +4951,24 @@ function getPostPrototype($forumId, $threadId, $row, $origin, $position = 0) {
 
     if ($origin != 'learnpath') {
         if (api_get_course_setting('allow_user_image_forum')) {
-            $html .= '<br />' . display_user_image($row['user_id'], $name) . '<br />';
+            $html .= Display::div(
+                display_user_image($row['user_id'], $name),
+                array(
+                    'class' => 'postUserImage'
+                )
+            );
         }
-        $html .= display_user_link(
+        $html .= Display::div(
+            display_user_link(
                 $row['user_id'],
                 $name,
                 '',
                 $username
-            ) . '<br />';
+            ),
+            array(
+                'class' => 'postUserFullName'
+            )
+        );
     } else {
         $html .= Display::tag('span',
                 $name,
@@ -4896,7 +4983,12 @@ function getPostPrototype($forumId, $threadId, $row, $origin, $position = 0) {
 
     $group_id = api_get_group_id();
 
-    $html .= api_convert_and_format_date($row['post_date']) . '<br /><br />';
+    $html .= Display::div(
+            api_convert_and_format_date($row['post_date']),
+            array(
+                'class' => 'postDatetime'
+            )
+        );
     // get attach id
     $attachment_list = get_attachment($postId);
     $id_attach = !empty($attachment_list) ? $attachment_list['id'] : '';
@@ -5047,7 +5139,7 @@ function getPostPrototype($forumId, $threadId, $row, $origin, $position = 0) {
     $html .= Display::tag(
         'td',
         prepare4display($row['post_title']),
-        array('class' => 'forum_message_post_title')
+        array('class' => 'forum_message_post_title postTitle')
     );
     $html .= "</tr>";
 
@@ -5055,7 +5147,7 @@ function getPostPrototype($forumId, $threadId, $row, $origin, $position = 0) {
     $html .= "<tr>";
 
     // see comments inside forumfunction.inc.php to lower filtering and allow more visual changes
-    $html .= "<td class=\"$messageclass\">" . prepare4display($row['post_text']) . "</td>";
+    $html .= "<td class=\"$messageclass postContent\">" . prepare4display($row['post_text']) . "</td>";
     $html .= "</tr>";
 
     // The check if there is an attachment

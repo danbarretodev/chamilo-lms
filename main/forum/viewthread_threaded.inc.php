@@ -61,7 +61,8 @@ $group_id = api_get_group_id();
 foreach ($rows as $post) {
     $counter++;
     $indent=$post['indent_cnt']*'20';
-    $thread_structure.= "<div style=\"margin-left: ".$indent."px;\">";
+    $thread_structure.= "<div style=\"margin-left: " .
+        $indent . "px;\" data-post-id=\"". $post['post_id'] . "\" >";
 
     if (isset($whatsnew_post_info[$current_forum['forum_id']][$current_thread['thread_id']][$post['post_id']]) AND
         !empty($whatsnew_post_info[$current_forum['forum_id']][$current_thread['thread_id']][$post['post_id']]) AND
