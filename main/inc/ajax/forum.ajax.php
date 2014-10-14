@@ -18,9 +18,11 @@ require_once api_get_path(LIBRARY_PATH).'document.lib.php';
 // Create a default error response
 $json = array(
     'error' => true,
-    'errorMessage' => 'ERROR',
+    'errorMessage' => get_lang('Error'),
 );
-$action = isset($_REQUEST['a']) ? $_REQUEST['a'] : null;
+$action = isset($_REQUEST['a']) ? $_REQUEST['a'] :
+    isset($_REQUEST['action']) ? $_REQUEST['action'] :
+        null;
 // Check if exist action
 if (!empty($action)) {
     require_once api_get_path(SYS_CODE_PATH) . 'forum/forumfunction.inc.php';
@@ -56,7 +58,6 @@ if (!empty($action)) {
                         $json['errorMessage'] = get_lang('YouMustAssignWeightOfQualification');
                         break;
                     }
-                    Security::clear_token();
                     $result = store_reply($current_forum, $_REQUEST, true);
                     $json['result'] = print_r($result,1);
                     if ($result['type'] === 'error') {
@@ -64,15 +65,21 @@ if (!empty($action)) {
                     } elseif(!empty($result['id'])) {
                         $json = array_merge($json, $result);
                         $json['error'] = false;
+                        $json['errorMessage'] = '';
                         $post = get_post_information($result['id']);
-
-                        $indent = isset($_REQUEST['parentIndent']) ?
-                            intval($_REQUEST['parentIndent']) + 20 :
-                            0 ;
+                        $view = Security::remove_XSS($_REQUEST['view']);
+                        if (isset($_REQUEST['parentIndent'])) {
+                            $indent = intval($_REQUEST['parentIndent']) + 20;
+                        } elseif (isset($_REQUEST['post_parent_id'])) {
+                            $indent = 20;
+                        } else {
+                            $indent = 0;
+                        }
+                        $json['indent'] = $indent;
                         $origin = isset($_REQUEST['origin']) ?
                             Security::remove_XSS($_REQUEST['origin']) :
                             '';
-                        switch ($_REQUEST['view']) {
+                        switch ($view) {
                             case 'threaded' :
                                 $json['html'] = Display::div(
                                     Display::return_icon('forumpostnew.gif') .
@@ -86,7 +93,8 @@ if (!empty($action)) {
                                     '</a></div>',
                                     array(
                                         'style' => 'margin-left: ' .
-                                            $indent . 'px;'
+                                            $indent . 'px;',
+                                        'data-post-id' => $post['post_id'],
                                     )
                                 );
                                 break;

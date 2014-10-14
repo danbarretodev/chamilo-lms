@@ -49,12 +49,11 @@ function addReply(event) {
     var postTitle = postHtml.find(".forum_message_post_title").html();
     var postText = "";
     if ($(this).attr("class") == "postActionQuote") {
-        var quoteUser = $(this).closest("td").children("a").eq(1).html();
+        var quoteUser = $(this).closest("td").find(".postUserFullName a").html();
         var quoteContent = $(this).closest("tbody").find(".forum_message_post_text").html();
         postText = $("#quoteMessagePrototype").html();
         postText = postText.replace("%quoteUser%", quoteUser);
         postText = postText.replace("%quoteContent%", quoteContent);
-        console.log(postText);
     }
     var replyForm = getReplyForm(postId, postTitle, postText);
     postHtml.after(replyForm);
@@ -99,28 +98,48 @@ function getReplyForm (postId, postTitle, postText) {
 
 function sendReplyMessage () {
     $(document).on("click", "#replyForm button[name=\'SubmitPost\']", function (event) {
-        event.preventDefault;
-        event.stopPropagation;
+        event.preventDefault();
+        event.stopPropagation();
         var postForm = $(this).closest("#thread");
         var params = postForm.attr("action");
+        var view="' . $_REQUEST['view'] .'";
+        var parentIndent;
+        switch(view) {
+            case "nested":
+                parentIndent = $("#replyForm").parent().css("margin-left").replace("px", "");
+                break;
+            case "threaded":
+                parentIndent = $("#replyForm").prev().data("postId");
+                parentIndent = $("#replyForm").siblings("div")
+                    .filter("[data-post-id=\'" + parentIndent + "\']")
+                    .css("margin-left").replace("px", "");
+                break;
+            case "flat":
+                // No break
+            default:
+                parentIndent = 0;
+                break;
+
+        }
         params = params.substr(params.indexOf("?"))
         $.ajax({
             type: "POST",
+            dataType: "json",
             url: "' . api_get_path(WEB_AJAX_PATH) .
                 'forum.ajax.php" + params +
-                "&view=' . $_REQUEST['view'] .
-                '&parentIdent=" +
-                $("#replyForm").siblings("div[data-post-id=' .
-                $_REQUEST['post'] .
-                '").css("margin-left").replace("px", ""),
-            data: getReplyData,
-            done: function(data) {
+                "&view=" + view +
+                "&parentIndent=" + parentIndent,
+            data: getReplyData(),
+            success: function(data) {
                 if (data.error) {
                     alert(data.errorMessage);
                 } else {
                     $("#replyForm").hide();
                     getReplyPost(data);
                 }
+            },
+            error: function() {
+                alert("' . get_lang("Error") . '");
             }
         });
     });
@@ -133,7 +152,12 @@ function getReplyData() {
     $("#replyForm").find("input").map(
         function(index){
             var name = $(this).attr("name");
-            var value = $(this).val();
+            var value;
+            if (name == "post_text") {
+                value = getPostText();
+            } else {
+                value = $(this).val();
+            }
             object[name] = value;
         }
     );
@@ -143,21 +167,8 @@ function getReplyData() {
 function getReplyPost(data) {
     if (checkReplyPost(data)) {
         var view = "' . $_REQUEST['view'] . '";
-        var parentPost;
-        switch (view) {
-            case "threaded" :
-                parentPost = $("#main_content").find("div[data-post-id=data.parentId]");
-                break;
-            case "nested" :
-                parentPost = $("#main_content").find("table[data-post-id=data.parentId]").closest("div");
-                break;
-            case "flat" :
-                //no break
-            default :
-                parentPost = $("#main_content").find("table[data-post-id=data.parentId]")
-                break;
-        }
-        parentPost.after(data.html);
+        newPostPosition = getNewPostPosition(data, view);
+        newPostPosition.after($(data.html));
     }
     return "";
 }
@@ -171,6 +182,51 @@ function checkReplyPost(data) {
         return true;
     }
     return false;
+}
+
+function getPostText() {
+    var inst = FCKeditorAPI.GetInstance("post_text");
+    var sValue = inst.GetHTML();
+    return sValue;
+}
+
+function getNewPostPosition(data, view) {
+    var position;
+    switch (view) {
+        case "threaded" :
+            position = $("#main_content")
+                .children("div")
+                .filter("[data-post-id=\'" + data.parentId + "\']")
+                .nextUntil(function () {
+                    var isNotParentLevel = parseInt($(this).css("margin-left").replace("px","")) < data.indent;
+                    var isVisible = $(this).attr("class") != "replyFormPrototype" ||
+                        $(this).attr("class") != "quoteMessagePrototype";
+                    return isNotParentLevel && isVisible;
+                }).andSelf().last();
+            break;
+        case "nested" :
+            position = $("#main_content")
+                .children("div")
+                .find("table")
+                .filter("[data-post-id=\'" + data.parentId + "\']")
+                .parent()
+                .nextUntil(function () {
+                    var isNotParentLevel = parseInt($(this).css("margin-left").replace("px","")) < data.indent;
+                    var isVisible = $(this).attr("class") != "replyFormPrototype" ||
+                        $(this).attr("class") != "quoteMessagePrototype";
+                    return isNotParentLevel && isVisible;
+                }).andSelf().last();
+            break;
+        case "flat" :
+        //no break
+        default :
+            position = $("#main_content")
+                .children("div")
+                .last();
+            break;
+    }
+
+    return position;
 }
 
 </script>';
