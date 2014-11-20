@@ -33,54 +33,14 @@ if (isset($_GET['id_coach']) && $_GET['id_coach'] != '') {
     $id_coach = api_get_user_id();
 }
 
+$currentAction = REPORT_ACTION_SESSIONS;
 if (api_is_drh() || api_is_session_admin() || api_is_platform_admin()) {
 
     $a_sessions = SessionManager::get_sessions_followed_by_drh(api_get_user_id());
 
-    if (!api_is_session_admin()) {
-        $menu_items[] = Display::url(
-            Display::return_icon('stats.png', get_lang('MyStats'), '', ICON_SIZE_MEDIUM),
-            api_get_path(WEB_CODE_PATH)."auth/my_progress.php"
-        );
-        $menu_items[] = Display::url(
-            Display::return_icon('user.png', get_lang('Students'), array(), ICON_SIZE_MEDIUM),
-            "index.php?view=drh_students&amp;display=yourstudents"
-        );
-        $menu_items[] = Display::url(
-            Display::return_icon('teacher.png', get_lang('Trainers'), array(), ICON_SIZE_MEDIUM),
-            'teachers.php'
-        );
-        $menu_items[] = Display::url(
-            Display::return_icon('course.png', get_lang('Courses'), array(), ICON_SIZE_MEDIUM),
-            'course.php'
-        );
-        $menu_items[] = Display::url(
-            Display::return_icon('session_na.png', get_lang('Sessions'), array(), ICON_SIZE_MEDIUM),
-            '#'
-        );
-    }
+    // Print action bar
+    echo MySpace::getActionBar($currentAction, array());
 
-    echo '<div class="actions">';
-    $nb_menu_items = count($menu_items);
-    if ($nb_menu_items > 1) {
-        foreach ($menu_items as $key => $item) {
-            echo $item;
-        }
-    }
-    if (count($a_sessions) > 0) {
-        echo '<span style="float:right">';
-        echo Display::url(
-            Display::return_icon('printer.png', get_lang('Print'), array(), 32),
-            'javascript: void(0);',
-            array('onclick'=>'javascript: window.print();')
-        );
-        echo Display::url(
-            Display::return_icon('export_csv.png', get_lang('ExportAsCSV'), array(), 32),
-            api_get_self().'?export=csv'
-        );
-        echo '</span>';
-    }
-    echo '</div>';
     echo Display::page_header(get_lang('YourSessionsList'));
 
 } else {

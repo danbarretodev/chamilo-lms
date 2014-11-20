@@ -82,77 +82,27 @@ if (isset($_GET['view']) && in_array($_GET['view'], $views)) {
     $view = $_GET['view'];
 }
 
-$menu_items = array();
+if ($is_drh) {
+    $currentAction = REPORT_ACTION_MY_SPACE_DRH;
+} else {
+    if ($view == 'admin') {
+        $currentAction = REPORT_ACTION_MY_SPACE_ADMIN;
+    } else {
+        $currentAction = REPORT_ACTION_MY_SPACE_TEACHER;
+    }
+}
 
+echo MySpace::getActionBar($currentAction, array('data' => array('display' => $display, 'view' => $view)));
 if ($is_platform_admin) {
     if ($view == 'admin') {
         $title = get_lang('CoachList');
-        $menu_items[] = Display::url(Display::return_icon('teacher.png', get_lang('TeacherInterface'), array(), ICON_SIZE_MEDIUM), api_get_self().'?view=teacher');
-        $menu_items[] = Display::url(Display::return_icon('star_na.png', get_lang('AdminInterface'), array(), ICON_SIZE_MEDIUM), api_get_self().'?view=admin');
-        $menu_items[] = Display::url(Display::return_icon('quiz.png', get_lang('ExamTracking'), array(), ICON_SIZE_MEDIUM), api_get_path(WEB_CODE_PATH).'tracking/exams.php');
-        $menu_items[] = Display::url(Display::return_icon('statistics.png', get_lang('CurrentCoursesReport'), array(), ICON_SIZE_MEDIUM), api_get_path(WEB_CODE_PATH).'mySpace/current_courses.php');
     } else {
-        $menu_items[] = Display::url(Display::return_icon('teacher_na.png', get_lang('TeacherInterface'), array(), ICON_SIZE_MEDIUM), '');
-        $menu_items[] = Display::url(Display::return_icon('star.png', get_lang('AdminInterface'), array(), ICON_SIZE_MEDIUM), api_get_self().'?view=admin');
-        $menu_items[] = Display::url(Display::return_icon('quiz.png', get_lang('ExamTracking'), array(), ICON_SIZE_MEDIUM), api_get_path(WEB_CODE_PATH).'tracking/exams.php');
-        $menu_items[] = Display::url(Display::return_icon('statistics.png', get_lang('CurrentCoursesReport'), array(), ICON_SIZE_MEDIUM), api_get_path(WEB_CODE_PATH).'mySpace/current_courses.php');
     }
 }
 
 if ($is_drh) {
 	$view = 'drh';
-    $menu_items[] = Display::url(Display::return_icon('user_na.png', get_lang('Students'), array(), ICON_SIZE_MEDIUM), '#');
-    $menu_items[] = Display::url(Display::return_icon('teacher.png', get_lang('Trainers'), array(), ICON_SIZE_MEDIUM), 'teachers.php');
-    $menu_items[] = Display::url(Display::return_icon('course.png', get_lang('Courses'), array(), ICON_SIZE_MEDIUM), 'course.php');
-    $menu_items[] = Display::url(Display::return_icon('session.png', get_lang('Sessions'), array(), ICON_SIZE_MEDIUM), 'session.php');
-    $menu_items[] = Display::url(Display::return_icon('empty_evaluation.png', get_lang('CompanyReport'), array(), ICON_SIZE_MEDIUM), 'company_reports.php');
-    $menu_items[] = Display::url(Display::return_icon('evaluation_rate.png', get_lang('CompanyReportResumed'), array(), ICON_SIZE_MEDIUM), 'company_reports_resumed.php');
 }
-
-echo '<div id="actions" class="actions">';
-echo '<span style="float:right">';
-
-if ($display == 'useroverview' || $display == 'sessionoverview' || $display == 'courseoverview') {
-    echo '<a href="'.api_get_self().'?display='.$display.'&export=csv&view='.$view.'">';
-    echo Display::return_icon("export_csv.png", get_lang('ExportAsCSV'), array(), 32);
-    echo '</a>';
-}
-echo '<a href="javascript: void(0);" onclick="javascript: window.print()">'.
-    Display::return_icon('printer.png', get_lang('Print'), '', ICON_SIZE_MEDIUM).'</a>';
-echo '</span>';
-
-if (!empty($session_id) && !in_array($display, array('accessoverview','lpprogressoverview','progressoverview','exerciseprogress', 'surveyoverview'))) {
-    echo '<a href="index.php">'.Display::return_icon('back.png', get_lang('Back'), '', ICON_SIZE_MEDIUM).'</a>';
-    if (!api_is_platform_admin()) {
-        if (api_get_setting('add_users_by_coach') == 'true') {
-            if ($is_coach) {
-                echo "<div align=\"right\">";
-                echo '<a href="user_import.php?id_session='.$session_id.'&action=export&amp;type=xml">'.
-                        Display::return_icon('excel.gif', get_lang('ImportUserList')).'&nbsp;'.get_lang('ImportUserList').'</a>';
-                echo "</div><br />";
-            }
-        }
-    } else {
-        echo "<div align=\"right\">";
-        echo '<a href="user_import.php?id_session='.$session_id.'&action=export&amp;type=xml">'.
-                Display::return_icon('excel.gif', get_lang('ImportUserList')).'&nbsp;'.get_lang('ImportUserList').'</a>';
-        echo "</div><br />";
-    }
-} else {
-	echo Display::url(Display::return_icon('stats.png', get_lang('MyStats'),'',ICON_SIZE_MEDIUM), api_get_path(WEB_CODE_PATH)."auth/my_progress.php");
-}
-
-// Actions menu
-$nb_menu_items = count($menu_items);
-if (empty($session_id) || in_array($display, array('accessoverview','lpprogressoverview', 'progressoverview', 'exerciseprogress', 'surveyoverview'))) {
-    if ($nb_menu_items > 1) {
-        foreach ($menu_items as $key => $item) {
-            echo $item;
-        }
-    }
-}
-
-echo '</div>';
 
 $userId  = api_get_user_id();
 $stats = Tracking::getStats($userId);

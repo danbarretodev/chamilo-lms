@@ -2386,6 +2386,546 @@ class MySpace
         xml_parser_free($parser);
         return $users;
     }
+
+    public static function returnReportAction(
+        $iconFilename,
+        $altText,
+        $url,
+        $imgAttributes = array(),
+        $anchorAttributes = array(),
+        $iconSize = ICON_SIZE_MEDIUM
+    )
+    {
+        return Display::url(
+            Display::return_icon(
+                $iconFilename,
+                $altText,
+                $imgAttributes,
+                $iconSize
+            ),
+            $url,
+            $anchorAttributes
+        );
+    }
+
+    /**
+     * @param int $action
+     * @param bool $isDisabled
+     * @return string
+     */
+    public static function getActionItem($action, $isDisabled = false, $extraParams = array())
+    {
+        $html = '';
+        // Get Option values
+        $isDisabled = boolval($isDisabled);
+        $imgAttributes = array();
+        $anchorAttributes = array();
+        $iconSize = ICON_SIZE_MEDIUM;
+        switch($action) {
+            case REPORT_ACTION_BACK:
+                if ($isDisabled) {
+                    $iconFilename = 'back.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'back.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/index.php';
+                }
+                $altText = get_lang('Back');
+                break;
+            case REPORT_ACTION_MY_PROGRESS:
+                if ($isDisabled) {
+                    $iconFilename = 'stats_na.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'stats.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'auth/my_progress.php';
+                }
+                $altText = get_lang('MyStats');
+                break;
+            case REPORT_ACTION_MY_SPACE_TEACHER:
+                if ($isDisabled) {
+                    $iconFilename = 'teacher_na.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'teacher.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/index.php?view=teacher';
+                }
+                $altText = get_lang('TeacherInterface');
+                break;
+            case REPORT_ACTION_MY_SPACE_ADMIN:
+                if ($isDisabled) {
+                    $iconFilename = 'star_na.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'star.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/index.php?view=admin';
+                }
+                $altText = get_lang('AdminInterface');
+                break;
+            case REPORT_ACTION_MY_SPACE_DRH:
+                if ($isDisabled) {
+                    $iconFilename = 'user_na.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'user.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/index.php?view=drh_students&' .
+                        'display=yourstudents';
+                }
+                $altText = get_lang('Students');
+                break;
+            case REPORT_ACTION_STUDENTS:
+                if ($isDisabled) {
+                    $iconFilename = 'user_na.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'user.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/students.php';
+                }
+                $altText = get_lang('Students');
+                break;
+            case REPORT_ACTION_TEACHERS:
+                if ($isDisabled) {
+                    $iconFilename = 'teacher_na.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'teacher.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/teachers.php';
+                }
+                $altText = get_lang('Trainers');
+                break;
+            case REPORT_ACTION_COURSES:
+                if ($isDisabled) {
+                    $iconFilename = 'course_na.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'course.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/course.php';
+                }
+                $altText = get_lang('Courses');
+                break;
+            case REPORT_ACTION_SESSIONS:
+                if ($isDisabled) {
+                    $iconFilename = 'session_na.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'session.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/session.php';
+                }
+                $altText = get_lang('Sessions');
+                break;
+            case REPORT_ACTION_EXAMS:
+                if ($isDisabled) {
+                    $iconFilename = 'quiz_na.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'quiz.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'tracking/exams.php';
+                }
+                $altText = get_lang('ExamTracking');
+                break;
+            case REPORT_ACTION_CURRENT_COURSES:
+                if ($isDisabled) {
+                    $iconFilename = 'statistics_na.png';
+                    $url = '';
+
+                } else {
+                    $iconFilename = 'statistics.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/current_courses.php';
+                }
+                $altText = get_lang('CurrentCoursesReport');
+                break;
+            case REPORT_ACTION_COMPANY_REPORT:
+                if ($isDisabled) {
+                    $iconFilename = 'empty_evaluation.png';
+                    $url = '';
+
+                } else {
+                    $iconFilename = 'empty_evaluation.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/company_reports.php';
+                }
+                $altText = get_lang('CompanyReport');
+                break;
+            case REPORT_ACTION_COMPANY_SUMMARY:
+                if ($isDisabled) {
+                    $iconFilename = 'evaluation_rate.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'evaluation_rate.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/company_reports_resumed.php';
+                }
+                $altText = get_lang('CompanyReportResumed');
+                break;
+            case REPORT_ACTION_IMPORT_USER:
+                if ($isDisabled) {
+                    $iconFilename = 'excel.gif';
+                    $url = '';
+                } else {
+                    $iconFilename = 'excel.gif';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/user_import.php?id_session=' . $extraParams['data']['session_id'] .
+                        '&action=export&type=xml';
+                }
+                $altText = get_lang('ImportUserList');
+                break;
+            case REPORT_ACTION_TRACKING_STUDENTS:
+                if ($isDisabled) {
+                    $iconFilename = 'user_na.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'user.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/user_import.php?id_session=' . $extraParams['data']['session_id'] .
+                        '&action=export&type=xml';
+                }
+                $altText = get_lang('ImportUserList');
+                break;
+            case REPORT_ACTION_TRACKING_COURSES:
+                if ($isDisabled) {
+                    $iconFilename = 'course.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'course.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/user_import.php?id_session=' . $extraParams['data']['session_id'] .
+                        '&action=export&type=xml';
+                }
+                $altText = get_lang('ImportUserList');
+                break;
+            case REPORT_ACTION_TRACKING_RESOURCES:
+                if ($isDisabled) {
+                    $iconFilename = 'tools.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'tools.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/user_import.php?id_session=' . $extraParams['data']['session_id'] .
+                        '&action=export&type=xml';
+                }
+                $altText = get_lang('ImportUserList');
+                break;
+            case REPORT_ACTION_PRINT:
+                if ($isDisabled) {
+                    $iconFilename = 'printer_na.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'printer.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : 'javascript: void(0);';
+                }
+                $altText = get_lang('Print');
+                break;
+            case REPORT_ACTION_EXPORT_CSV:
+                $params = array(
+                    'keyword' => 'keyword',
+                    'display' =>'display',
+                    'view' => 'view'
+                );
+                if ($isDisabled) {
+                    $iconFilename = 'export_csv_na.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'export_csv.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : api_get_path(WEB_CODE_PATH) .
+                        'mySpace/index.php?export=csv';
+                    if (
+                        isset($extraParams['data']) &&
+                        is_array($extraParams['data'])
+                    ) {
+                        foreach($params as $key => $param) {
+                            if (isset($extraParams['data'][$key])) {
+                                $url .= '&' . $param . '=' . $extraParams['data'][$key];
+                            }
+                        }
+                    }
+                }
+                $altText = get_lang('ExportAsCSV');
+                break;
+            case REPORT_ACTION_EXPORT_XLS:
+                $params = array(
+                    'exercise_id' => 'exercise_id',
+                    'score' => 'score',
+                );
+                if ($isDisabled) {
+                    $iconFilename = 'export_excel_na.png';
+                    $url = '';
+                } else {
+                    $iconFilename = 'export_excel.png';
+                    $url = (isset($extraParams['url'])) ? $extraParams['url'] : '';
+                }
+                $altText = get_lang('ExportAsXLS');
+                break;
+            default:
+                break;
+        }
+
+        if (isset($iconFilename) && isset ($altText) && isset($url)) {
+            if (
+                isset($extraParams) && (
+                    is_array($extraParams) &&
+                    !empty($extraParams)
+                )
+            ) {
+                if (
+                    isset($extraParams['imgAttributes']) &&
+                    is_array($extraParams['imgAttributes'])
+                ) {
+                    $imgAttributes = $extraParams['imgAttributes'];
+                }
+                if (
+                    isset($extraParams['anchorAttributes']) &&
+                        is_array($extraParams['anchorAttributes'])
+                ) {
+                    $anchorAttributes = $extraParams['anchorAttributes'];
+                }
+                if (isset($extraParams['iconSize'])) {
+                    $iconSize = $extraParams['iconSize'];
+                }
+            }
+            $html = self::returnReportAction(
+                $iconFilename,
+                $altText,
+                $url,
+                $imgAttributes,
+                $anchorAttributes,
+                $iconSize
+            );
+
+            // Post Action icon
+            if ($action === REPORT_ACTION_IMPORT_USER) {
+                $html = Display::div($html, array('align' => 'right')) . '<br />';
+            }
+        }
+
+        return $html;
+    }
+
+    public static function getActionOption ($action, $extraParams = array()) {
+        $html = '';
+        $extraParams[REPORT_ACTION_PRINT]['anchorAttributes'] = array(
+            'onclick' => 'javascript: window.print()',
+        );
+        $options[REPORT_ACTION_PRINT] = array(
+            'isDeclined' => false,
+            'extraParams' => $extraParams,
+        );
+        // There are few options, then onlysome cases will add options and the rest just break
+        switch ($action) {
+            case REPORT_ACTION_MY_PROGRESS:
+                break;
+            case REPORT_ACTION_MY_SPACE_TEACHER:
+                if (
+                    isset($extraParams['data']['display']) && (
+                        $extraParams['data']['display'] == 'useroverview' ||
+                        $extraParams['data']['display'] == 'sessionoverview' ||
+                        $extraParams['data']['display'] == 'courseoverview'
+                    )
+                ) {
+                    $options[REPORT_ACTION_EXPORT_CSV] = array(
+                        'isDeclined' => false,
+                        'extraParams' => $extraParams,
+                    );
+                }
+                break;
+            case REPORT_ACTION_MY_SPACE_ADMIN:
+                break;
+            case REPORT_ACTION_STUDENTS:
+                $options[REPORT_ACTION_EXPORT_CSV] = array(
+                    'isDeclined' => false,
+                    'extraParams' => $extraParams,
+                );
+                break;
+            case REPORT_ACTION_TEACHERS:
+                $options[REPORT_ACTION_EXPORT_CSV] = array(
+                    'isDeclined' => false,
+                    'extraParams' => $extraParams,
+                );
+                break;
+            case REPORT_ACTION_COURSES:
+                break;
+            case REPORT_ACTION_SESSIONS:
+                $options[REPORT_ACTION_EXPORT_CSV] = array(
+                    'isDeclined' => false,
+                    'extraParams' => $extraParams,
+                );
+                break;
+            case REPORT_ACTION_EXAMS:
+                $options[REPORT_ACTION_EXPORT_XLS] = array(
+                    'isDeclined' => false,
+                    'extraParams' => $extraParams,
+                );
+                break;
+            case REPORT_ACTION_CURRENT_COURSES:
+                $options[REPORT_ACTION_EXPORT_XLS] = array(
+                    'isDeclined' => false,
+                    'extraParams' => $extraParams,
+                );
+                break;
+            case REPORT_ACTION_COMPANY_REPORT:
+                break;
+            case REPORT_ACTION_COMPANY_SUMMARY:
+                break;
+            default:
+                break;
+        }
+        foreach ($options as $option => $params) {
+            $html .= self::getActionItem($option, $params['isDisabled'], $params['extraParams'][$option]);
+        }
+        $html = Display::span($html, array('style' => 'float:right'));
+
+        return $html;
+    }
+
+    /**
+     *
+     */
+    public static function getActionBar($currentAction, $extraParams) {
+        $html = '';
+        // Check if user is registered
+        if (!api_is_anonymous()) {
+
+            if (isset($extraParams['cidReq']) && api_is_coach(null, $extraParams['cidReq'])) {
+                $actions[REPORT_ACTION_TRACKING_RESOURCES] = false;
+                $actions[REPORT_ACTION_TRACKING_COURSES] = false;
+                $actions[REPORT_ACTION_TRACKING_STUDENTS] = false;
+            } else {
+                if (api_is_platform_admin()) {
+                    /*
+                     * Administrator have the next actions:
+                     * My progress, My space(teacher), My space (admin), Exercise tacking, Current course reports
+                     * see - refs CT#7382
+                     */
+                    if (
+                        isset($extraParams['data']['session_id']) &&
+                        !empty($extraParams['data']['session_id']) &&
+                        isset($extraParams['data']['display']) &&
+                        !in_array(
+                            $extraParams['data']['display'],
+                            array(
+                                'accessoverview',
+                                'lpprogressoverview',
+                                'progressoverview',
+                                'exerciseprogress',
+                                'surveyoverview',
+                            )
+                        )
+                    ) {
+                        $actions[REPORT_ACTION_IMPORT_USER] = false;
+                    }
+                    $actions[REPORT_ACTION_MY_PROGRESS] = false;
+                    $actions[REPORT_ACTION_MY_SPACE_TEACHER] = false;
+                    $actions[REPORT_ACTION_MY_SPACE_ADMIN] = false;
+                    $actions[REPORT_ACTION_EXAMS] = false;
+                    $actions[REPORT_ACTION_CURRENT_COURSES] = false;
+                } elseif (api_is_drh()) {
+                    /*
+                     * Human Resource Director have the next actions:
+                     * My progress, My space(teacher), Students, Teachers,
+                     * Course, Session, Company reports, Company reports summary
+                     * see - refs CT#7382
+                     */
+                    $actions[REPORT_ACTION_MY_PROGRESS] = false;
+                    $actions[REPORT_ACTION_MY_SPACE_DRH] = false;
+                    $actions[REPORT_ACTION_TEACHERS] = false;
+                    $actions[REPORT_ACTION_COURSES] = false;
+                    $actions[REPORT_ACTION_SESSIONS] = false;
+                    $actions[REPORT_ACTION_COMPANY_REPORT] = false;
+                    $actions[REPORT_ACTION_COMPANY_SUMMARY] = false;
+
+                } elseif (api_is_teacher()) {
+                    /*
+                     * Teacher have the next actions:
+                     * My progress, My space(teacher)
+                     * see - refs CT#7382
+                     */
+
+                    if (
+                        isset($extraParams['data']['session_id']) &&
+                        !empty($extraParams['data']['session_id']) &&
+                        isset($extraParams['data']['display']) &&
+                        !in_array(
+                            $extraParams['data']['display'],
+                            array(
+                                'accessoverview',
+                                'lpprogressoverview',
+                                'progressoverview',
+                                'exerciseprogress',
+                                'surveyoverview',
+                            )
+                        )
+                    ) {
+                        $actions[REPORT_ACTION_BACK] = false;
+                        if (
+                            api_get_setting('add_users_by_coach') == 'true' &&
+                            api_is_coach($extraParams['data']['session_id'])
+                        ) {
+                            $actions[REPORT_ACTION_IMPORT_USER] = false;
+                        }
+                    }
+                    $actions[REPORT_ACTION_MY_PROGRESS] = false;
+                    $actions[REPORT_ACTION_MY_SPACE_TEACHER] = false;
+
+                } elseif (api_is_student()) {
+                    /*
+                     * Student have the next actions:
+                     * My progress
+                     * see - refs CT#7382
+                     */
+                    // Do not show action bar
+                    $actions[REPORT_ACTION_MY_PROGRESS] = false;
+
+                } elseif (api_is_session_admin()) {
+                    /*
+                     * Student have the next actions:
+                     * My progress
+                     * see - refs CT#7382
+                     */
+                    // Do not show action bar
+                    $actions[REPORT_ACTION_MY_PROGRESS] = false;
+
+                } else {
+                    // Nothing to do
+                }
+            }
+
+            if (
+                isset($actions) && (
+                    is_array($actions) &&
+                    count($actions) > 1
+                )
+            ) {
+                $actions[$currentAction] = true;
+                foreach ($actions as $action => $isDisabled) {
+                    $html .= self::getActionItem($action, $isDisabled);
+                }
+                // Add options (e.g Print, Export to CSV)
+                $html .= self::getActionOption($currentAction, $extraParams);
+                // Check if should use action div
+                if (is_array($extraParams) && isset($extraParams['noDiv']) && $extraParams['noDiv']) {
+                    // Nothing to do
+                } else {
+                    $html = Display::div($html, array(
+                        'id' => 'actions',
+                        'class' => 'actions',
+                    ));
+                }
+            }
+        }
+
+        return $html;
+    }
+
 }
 
 

@@ -281,11 +281,65 @@ foreach ($array as $row_table) {
 	$table->updateRowAttributes($row, $row % 2 ? 'class="row_even"' : 'class="row_odd"', true);
 	$row++;
 }
-
-	
+$currentAction = REPORT_ACTION_CURRENT_COURSES;
+echo MySpace::getActionBar($currentAction, array());
 echo '<div class="actions">';
-echo '<a href="'.api_get_path(WEB_CODE_PATH).'mySpace">'.Display::return_icon('back.png', get_lang('Back'), array(), 32).'</a>';
-echo '<a href="'.api_get_path(WEB_CODE_PATH).'mySpace/current_courses.php?export=1">'.Display::return_icon('export_excel.png', get_lang('CurrentCoursesReport'), array(), 32).'</a> ';
+echo Display::url(
+    Display::return_icon(
+        'stats.png',
+        get_lang('MyStats'),
+        '',
+        ICON_SIZE_MEDIUM
+    ),
+    api_get_path(WEB_CODE_PATH) . 'auth/my_progress.php'
+);
+echo Display::url(
+    Display::return_icon(
+        'teacher.png',
+        get_lang('TeacherInterface'),
+        array(),
+        ICON_SIZE_MEDIUM
+    ),
+    api_get_path(WEB_CODE_PATH) . 'mySpace/index.php?view=teacher'
+);
+echo Display::url(
+    Display::return_icon(
+        'star.png',
+        get_lang('AdminInterface'),
+        array(),
+        ICON_SIZE_MEDIUM
+    ),
+    api_get_path(WEB_CODE_PATH) . 'mySpace/index.php?view=admin'
+);
+echo Display::url(
+    Display::return_icon(
+        'quiz.png',
+        get_lang('ExamTracking'),
+        array(),
+        ICON_SIZE_MEDIUM
+    ), api_get_path(WEB_CODE_PATH) . 'tracking/exams.php'
+);
+echo Display::url(
+    Display::return_icon(
+        'statistics_na.png',
+        get_lang('CurrentCoursesReport'),
+        array(),
+        ICON_SIZE_MEDIUM
+    ),
+    ''
+);
+echo Display::span(
+    '<a href="' . api_get_path(WEB_CODE_PATH) .
+    'mySpace/current_courses.php?export=1">' . Display::return_icon(
+        'export_excel.png',
+        get_lang('CurrentCoursesReport'),
+        array(),
+        32
+    ) . '</a> ',
+    array(
+        'style' => 'float:right',
+    )
+);
 echo '</div>';
 echo '<div style="overflow:auto;">';
 echo $table->toHtml();

@@ -14,7 +14,6 @@ require_once api_get_path(LIBRARY_PATH).'pear/Spreadsheet_Excel_Writer/Writer.ph
 
 $toolTable = Database::get_course_table(TABLE_TOOL_LIST);
 $quizTable = Database::get_course_table(TABLE_QUIZ_TEST);
-
 $this_section = SECTION_TRACKING;
 $is_allowedToTrack = $is_courseAdmin || $is_platformAdmin || $is_courseCoach || $is_sessionAdmin;
 
@@ -83,46 +82,20 @@ $exerciseId = isset($_REQUEST['exercise_id']) ? intval($_REQUEST['exercise_id'])
 
 $form->setDefaults(array('score' => $filter_score));
 
+$currentAction = REPORT_ACTION_EXAMS;
+
 if (!$exportToXLS) {
     Display :: display_header(get_lang('Reporting'));
-    echo '<div class="actions">';
+    $actionParams = array(
+        REPORT_ACTION_EXPORT_XLS => array(
+            'url' => api_get_self() .
+                '?export=1&score=' . $filter_score .
+                '&exercise_id=' . $exerciseId .
+                '&' . api_get_cidreq()
+        )
+    );
     if ($global) {
-
-        echo '<a href="'.api_get_path(WEB_CODE_PATH).'auth/my_progress.php">'.
-        Display::return_icon('stats.png', get_lang('MyStats'), '', ICON_SIZE_MEDIUM);
-        echo '</a>';
-
-        echo '<span style="float:right">';
-
-        echo '<a href="'.api_get_self().'?export=1&score='.$filter_score.'&exercise_id='.$exerciseId.'&'.api_get_cidreq().'">'.
-            Display::return_icon('export_excel.png',get_lang('ExportAsXLS'),'',ICON_SIZE_MEDIUM).'</a>';
-        echo '<a href="javascript: void(0);" onclick="javascript: window.print()">'.
-            Display::return_icon('printer.png',get_lang('Print'),'',ICON_SIZE_MEDIUM).'</a>';
-        echo '</span>';
-
-        $menuItems[] = Display::url(
-            Display::return_icon('teacher.png', get_lang('TeacherInterface'), array(), 32),
-            api_get_path(WEB_CODE_PATH).'mySpace/?view=teacher'
-        );
-        if (api_is_platform_admin()) {
-            $menuItems[] = Display::url(
-                Display::return_icon('star.png', get_lang('AdminInterface'), array(), 32),
-                api_get_path(WEB_CODE_PATH).'mySpace/index.php?view=admin'
-            );
-        } else {
-            $menuItems[] = Display::url(
-                Display::return_icon('star.png', get_lang('CoachInterface'), array(), 32),
-                api_get_path(WEB_CODE_PATH).'mySpace/index.php?view=coach'
-            );
-        }
-        $menuItems[] = Display::return_icon('quiz_na.png', get_lang('ExamTracking'), array(), 32);
-
-        $nb_menu_items = count($menuItems);
-        if ($nb_menu_items > 1) {
-            foreach ($menuItems as $key=> $item) {
-                echo $item;
-            }
-        }
+        echo MySpace::getActionBar($currentAction, $actionParams);
     } else {
         echo Display::url(
             Display::return_icon('user.png', get_lang('StudentsTracking'), array(), 32),
