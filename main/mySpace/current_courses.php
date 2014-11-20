@@ -25,6 +25,7 @@ if (!api_is_allowed_to_create_course()) {
 $user_id = api_get_user_id();
 $my_courses = CourseManager::get_course_list_of_user_as_course_admin($user_id);
 $array = array();
+$currentAction = REPORT_ACTION_CURRENT_COURSES;
 
 $i = 0;
 $session_id = 0;
@@ -281,12 +282,13 @@ foreach ($array as $row_table) {
 	$table->updateRowAttributes($row, $row % 2 ? 'class="row_even"' : 'class="row_odd"', true);
 	$row++;
 }
+$actionParams[REPORT_ACTION_EXPORT_XLS] = array(
+    'url' => api_get_path(WEB_CODE_PATH) .
+        'mySpace/current_courses.php?export=1',
+);
 
-	
-echo '<div class="actions">';
-echo '<a href="'.api_get_path(WEB_CODE_PATH).'mySpace">'.Display::return_icon('back.png', get_lang('Back'), array(), 32).'</a>';
-echo '<a href="'.api_get_path(WEB_CODE_PATH).'mySpace/current_courses.php?export=1">'.Display::return_icon('export_excel.png', get_lang('CurrentCoursesReport'), array(), 32).'</a> ';
-echo '</div>';
+echo MySpace::getActionBar($currentAction, $actionParams);
+
 echo '<div style="overflow:auto;">';
 echo $table->toHtml();
 echo '</div>';

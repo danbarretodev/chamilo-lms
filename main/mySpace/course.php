@@ -63,7 +63,8 @@ if (api_get_setting('add_users_by_coach') == 'true') {
 }
 
 Display :: display_header($nameTools);
-
+// Assign current action viewed to disable it in action bar
+$currentAction = REPORT_ACTION_COURSES;
 $a_courses = array();
 if (api_is_drh() || api_is_session_admin() || api_is_platform_admin()) {
     $title = '';
@@ -113,24 +114,9 @@ if (api_is_drh() || api_is_session_admin() || api_is_platform_admin()) {
         }
     }
 
-    echo '<div class="actions">';
-    $nb_menu_items = count($menu_items);
-    if ($nb_menu_items > 1) {
-        foreach ($menu_items as $key => $item) {
-            echo $item;
-        }
-    }
-    if (count($a_courses) > 0) {
-        echo '<span style="float:right">';
-        echo Display::url(
-            Display::return_icon('printer.png', get_lang('Print'), array(), 32),
-            'javascript: void(0);',
-            array('onclick'=>'javascript: window.print();')
-        );
-        echo '</span>';
-    }
+    // Echo action bar
+    echo MySpace::getActionBar($currentAction, array());
 
-    echo '</div>';
     echo Display::page_header($title);
 }
 

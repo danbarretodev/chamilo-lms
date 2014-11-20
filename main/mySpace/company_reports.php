@@ -80,8 +80,10 @@ $(function() {
     });
 });
 </script>';
+$currentAction = REPORT_ACTION_COMPANY_REPORT;
 $content = Display::grid_html('user_course_report');
-
+$actions = MySpace::getActionBar($currentAction, array('noDiv' => true));
 $tpl = new Template($tool_name);
+$tpl->assign('actions', $actions);
 $tpl->assign('content', $content);
 $tpl->display_one_col_template();

@@ -90,20 +90,15 @@ $nbStudents = count($a_students);
 
 /* MAIN CODE */
 
-echo '<div class="actions">';
-
-echo Display::url(Display::return_icon('user.png', get_lang('StudentsTracking'), array(), 32), 'courseLog.php?'.api_get_cidreq());        
-echo Display::return_icon('course_na.png', get_lang('CourseTracking'), array(), 32);
-echo Display::url(Display::return_icon('tools.png', get_lang('ResourcesTracking'), array(), 32), 'course_log_resources.php?'.api_get_cidreq());        
-
-echo '<span style="float:right; padding-top:0px;">';
-echo '<a href="javascript: void(0);" onclick="javascript: window.print();">'.Display::return_icon('printer.png', get_lang('Print'),'',ICON_SIZE_MEDIUM).'</a>';
-
-echo '<a href="'.api_get_self().'?'.api_get_cidreq().'&id_session='.api_get_session_id().'&export=csv">
-	'.Display::return_icon('export_csv.png', get_lang('ExportAsCSV'),'',ICON_SIZE_MEDIUM).'</a>';	
-
-echo '</span>';
-echo '</div>';
+$currentAction = REPORT_ACTION_TRACKING_COURSES;
+$exportCsvUrl = api_get_self() . '?' . api_get_cidreq() .
+    '&id_session=' . api_get_session_id() .
+    '&export=csv';
+$actionParams[REPORT_ACTION_EXPORT_CSV] = array(
+    'url' => $exportCsvUrl,
+);
+$actionParams['cidReq'] = api_get_cidreq();
+echo MySpace::getActionBar($currentAction, $actionParams);
 
 $course_code = api_get_course_id();
 

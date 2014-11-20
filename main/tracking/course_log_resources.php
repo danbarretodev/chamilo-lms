@@ -73,38 +73,23 @@ Display::display_header($nameTools, 'Tracking');
 
 /* MAIN CODE */
 
-echo '<div class="actions">';
-echo Display::url(
-    Display::return_icon('user.png', get_lang('StudentsTracking'), array(), ICON_SIZE_MEDIUM),
-    api_get_path(WEB_CODE_PATH).'tracking/courseLog.php?'.api_get_cidreq()
-);
-
-echo Display::url(
-    Display::return_icon('course.png', get_lang('CourseTracking'), array(), ICON_SIZE_MEDIUM),
-    api_get_path(WEB_CODE_PATH).'tracking/course_log_tools.php?'.api_get_cidreq()
-);
-
-echo Display::return_icon('tools_na.png', get_lang('ResourcesTracking'), array(), ICON_SIZE_MEDIUM);
-echo '<span style="float:right; padding-top:0px;">';
-echo '<a href="javascript: void(0);" onclick="javascript: window.print();">'.
-    Display::return_icon('printer.png', get_lang('Print'),'',ICON_SIZE_MEDIUM).
-'</a>';
-
-$addional_param = '';
+$additionalParam = '';
 if (isset($_GET['additional_profile_field'])) {
-    $addional_param ='additional_profile_field='.intval($_GET['additional_profile_field']);
+    $additionalParam ='&additional_profile_field=' . intval($_GET['additional_profile_field']);
 }
 
-$users_tracking_per_page = '';
 if (isset($_GET['users_tracking_per_page'])) {
-    $users_tracking_per_page= '&users_tracking_per_page='.intval($_GET['users_tracking_per_page']);
+    $additionalParam = '&users_tracking_per_page=' . intval($_GET['users_tracking_per_page']);
 }
 
-echo '<a href="'.api_get_self().'?'.api_get_cidreq().'&export=csv&'.$addional_param.$users_tracking_per_page.'">
-'.Display::return_icon('export_csv.png', get_lang('ExportAsCSV'),'',ICON_SIZE_MEDIUM).'</a>';
+$currentAction = REPORT_ACTION_TRACKING_RESOURCES;
+$exportCsvUrl = api_get_self() . '?' . api_get_cidreq() . '&export=csv'. $additionalParam;
+$actionParams[REPORT_ACTION_EXPORT_CSV] = array(
+    'url' => $exportCsvUrl,
+);
+$actionParams['cidReq'] = api_get_cidreq();
+echo MySpace::getActionBar($currentAction, $actionParams);
 
-echo '</span>';
-echo '</div>';
 
 // Create a search-box.
 $form = new FormValidator(

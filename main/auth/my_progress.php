@@ -21,6 +21,19 @@ $nameTools = get_lang('MyProgress');
 
 api_block_anonymous_users();
 
+if (!api_is_student()) {
+    $interbreadcrumb[] = array (
+        'url' => api_get_path(WEB_CODE_PATH) .
+            'mySpace/index.php',
+        'name' => get_lang('MySpace')
+    );
+}
+
+$interbreadcrumb[] = array (
+    'url' => '#',
+    'name' => get_lang('MyProgress')
+);
+
 $htmlHeadXtra[] = api_get_js('jquery.timelinr-0.9.5.js');
 $htmlHeadXtra[] = '
 <script language="javascript">
@@ -108,8 +121,11 @@ if (empty($content)) {
     $message = Display::return_message(get_lang('NoDataAvailable'), 'warning');
 }
 
-$tpl = new Template($tool_name);
 
+$currentAction = REPORT_ACTION_MY_PROGRESS;
+$tpl = new Template($tool_name);
+$actions = MySpace::getActionBar($currentAction, array('noDiv' => true));
+$tpl->assign('actions', $actions);
 $tpl->assign('message', $message);
 $tpl->assign('content', $content);
 $tpl->display_one_col_template();

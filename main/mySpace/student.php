@@ -178,30 +178,8 @@ if ($export_csv) {
 }
 
 $sort_by_first_name = api_sort_by_first_name();
-$actions .= '<div class="actions">';
 
-if (api_is_drh()) {
-    $menu_items = array(
-        Display::url(Display::return_icon('stats.png', get_lang('MyStats'), '', ICON_SIZE_MEDIUM), api_get_path(WEB_CODE_PATH)."auth/my_progress.php" ),
-        Display::url(Display::return_icon('user_na.png', get_lang('Students'), array(), ICON_SIZE_MEDIUM), '#'),
-        Display::url(Display::return_icon('teacher.png', get_lang('Trainers'), array(), ICON_SIZE_MEDIUM), 'teachers.php'),
-        Display::url(Display::return_icon('course.png', get_lang('Courses'), array(), ICON_SIZE_MEDIUM), 'course.php'),
-        Display::url(Display::return_icon('session.png', get_lang('Sessions'), array(), ICON_SIZE_MEDIUM), 'session.php')
-    );
-
-    $nb_menu_items = count($menu_items);
-    if ($nb_menu_items > 1) {
-        foreach ($menu_items as $key => $item) {
-            $actions .= $item;
-        }
-    }
-}
-
-$actions .= '<span style="float:right">';
-$actions .= Display::url(Display::return_icon('printer.png', get_lang('Print'), array(), ICON_SIZE_MEDIUM), 'javascript: void(0);', array('onclick'=>'javascript: window.print();'));
-$actions .= Display::url(Display::return_icon('export_csv.png', get_lang('ExportAsCSV'), array(), ICON_SIZE_MEDIUM), api_get_self().'?export=csv&keyword='.$keyword);
-$actions .= '</span>';
-$actions .= '</div>';
+$currentAction = REPORT_ACTION_STUDENTS;
 
 $table = new SortableTable(
     'tracking_student',
@@ -252,6 +230,10 @@ $form = new FormValidator('search_user', 'get', api_get_path(WEB_CODE_PATH).'myS
 $form = Tracking::setUserSearchForm($form);
 $form->setDefaults($params);
 
+$actionParams[REPORT_ACTION_EXPORT_CSV] = array(
+    'url' => api_get_self() . '?export=csv&keyword=' . $keyword,
+);
+
 if ($export_csv) {
     // send the csv file if asked
     $content = $table->get_table_data();
@@ -265,7 +247,7 @@ if ($export_csv) {
     exit;
 } else {
     Display::display_header($nameTools);
-    echo $actions;
+    echo MySpace::getActionBar($currentAction, $actionParams);
     $page_title = get_lang('Students');
     echo Display::page_subheader($page_title);
     if (isset($active)) {
