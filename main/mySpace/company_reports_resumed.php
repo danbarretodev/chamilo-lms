@@ -18,7 +18,7 @@ if (!(api_is_platform_admin(false, true))) {
 
 $interbreadcrumb[] = array('url' => 'index.php', 'name' => get_lang('MySpace'));
 
-$tool_name = get_lang('Report');
+$tool_name = get_lang('CompanyReportResumed');
 $this_section = SECTION_TRACKING;
 $htmlHeadXtra[] = api_get_jqgrid_js();
 

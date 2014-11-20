@@ -8,7 +8,6 @@
  * Code
  */
 ob_start();
-$nameTools = 'Cours';
 // name of the language file that needs to be included
 $language_file = array('admin', 'registration', 'index', 'tracking');
 $cidReset = true;
@@ -17,6 +16,7 @@ require_once '../inc/global.inc.php';
 require_once api_get_path(LIBRARY_PATH).'export.lib.inc.php';
 
 $this_section = SECTION_TRACKING;
+$nameTools = get_lang('Courses');
 
 $sessionId = isset($_GET['session_id']) ? intval($_GET['session_id']) : null;
 

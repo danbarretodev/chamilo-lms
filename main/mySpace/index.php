@@ -101,6 +101,9 @@ if ($is_session_admin) {
 
 $actionParams[REPORT_ACTION_EXPORT_CSV] = array(
     'url' => api_get_self() . '?display=' . $display . '&export=csv&view=' . $view,
+    'data' => array(
+        'display' => $display,
+    ),
 );
 echo MySpace::getActionBar($currentAction, $actionParams);
 if ($is_platform_admin) {

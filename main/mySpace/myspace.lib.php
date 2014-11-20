@@ -2387,6 +2387,16 @@ class MySpace
         return $users;
     }
 
+    /**
+     * Return an HTML anchor containing an icon, structured for report actions
+     * @param $iconFilename Used to get Icon img
+     * @param $altText Used for alt attribute
+     * @param $url Used for href attribute
+     * @param array $imgAttributes Attributes for img element
+     * @param array $anchorAttributes Attributes for anchor element
+     * @param int $iconSize by deafult: ICON_SIZE_MEDIUM
+     * @return string
+     */
     public static function returnReportAction(
         $iconFilename,
         $altText,
@@ -2408,6 +2418,16 @@ class MySpace
         );
     }
 
+    /**
+     * Join found params into data, then return a string ready to add to base url
+     * @param array $params An Key => Param array where
+     * Key will be used to search in $data
+     * and Param will be used to add it to Url
+     * @param array $data An Key => Value array where
+     * Key will be used to find Values, should exist into $params keys
+     * and Value will be added to Url param
+     * @return string
+     */
     public static function implodeActionParams($params, $data) {
         $isFirstParam = true;
         $url = '';
@@ -2429,9 +2449,13 @@ class MySpace
     }
 
     /**
+     * Return an HTML containing the action specified
      * @param int $action
-     * @param bool $isDisabled
-     * @param array $extraParams
+     * @param bool $isDisabled Used to disable action (Not available icon mode)
+     * @param array $extraParams This array should have params required for generate action Items.
+     * Could have the next keys
+     * data: An array containing specific params for action icon (e.g $data['cidReq'])
+     * url: Used to set custom url instead of default, Must be set for Export actions
      * @return string
      */
     public static function getActionItem($action, $isDisabled = false, $extraParams = array())
@@ -2746,6 +2770,15 @@ class MySpace
         return $html;
     }
 
+    /**
+     * Returns HTML options by an specified action
+     * @param int $action
+     * @param array $extraParams Array used to check extra data.
+     * Should have the report action constant as a Key for specific extra data
+     * (e.g $extraParams[REPORT_ACTION_PRINT])
+     * Should use 'data' key for general data
+     * @return string
+     */
     public static function getActionOption ($action, $extraParams = array()) {
         $html = '';
         $extraParams[REPORT_ACTION_PRINT]['anchorAttributes'] = array(
@@ -2755,7 +2788,7 @@ class MySpace
             'isDeclined' => false,
             'extraParams' => $extraParams,
         );
-        // There are few options, then onlysome cases will add options and the rest just break
+        // There are few options, then only some cases will add options and the rest just break
         switch ($action) {
             case REPORT_ACTION_MY_PROGRESS:
                 break;
@@ -2836,6 +2869,7 @@ class MySpace
                 break;
         }
         foreach ($options as $option => $params) {
+            // Load option HTML, giving the extra params specific to action item
             $html .= self::getActionItem($option, $params['isDisabled'], $params['extraParams'][$option]);
         }
         $html = Display::span($html, array('style' => 'float:right'));
@@ -2844,32 +2878,52 @@ class MySpace
     }
 
     /**
-     *
+     * Return all the actions by role
+     * @param int $currentAction current action to be showed as disabled
+     * @param array $extraParams an Array with need data for all the actions
+     * Could have the next keys:
+     * noDiv: if is true return the list of actions without div HTML, util for some templates
+     * cidReq: Used to pass api_get_cidReq() result and check if is a course (session) report
+     * data: Used to read extra data user for some conditions
+     * @return string
      */
     public static function getActionBar($currentAction, $extraParams) {
         $html = '';
         // Check if user is registered
         if (!api_is_anonymous()) {
             if ($currentAction == REPORT_ACTION_STUDENTS) {
+                // Action students is into mySpace action form
                 $actions[REPORT_ACTION_BACK] = false;
                 $actions[REPORT_ACTION_STUDENTS] = false;
-            } elseif (isset($extraParams['cidReq']) && (api_is_coach() || api_is_platform_admin())) {
+            } elseif ( // A course or session report
+                isset($extraParams['cidReq']) && (
+                    api_is_course_tutor() ||
+                    api_is_coach() ||
+                    api_is_platform_admin()
+                )
+            ) {
                 $actions[REPORT_ACTION_TRACKING_COURSES] = false;
                 $actions[REPORT_ACTION_TRACKING_STUDENTS] = false;
                 $actions[REPORT_ACTION_TRACKING_RESOURCES] = false;
                 $actions[REPORT_ACTION_EXAMS] = false;
-                // Generate URL with cidReq
+                // add cidReq to params
                 $extraParams[REPORT_ACTION_TRACKING_COURSES]['data']['cidReq'] = $extraParams['cidReq'];
                 $extraParams[REPORT_ACTION_TRACKING_STUDENTS]['data']['cidReq'] = $extraParams['cidReq'];
                 $extraParams[REPORT_ACTION_TRACKING_RESOURCES]['data']['cidReq'] = $extraParams['cidReq'];
                 $extraParams[REPORT_ACTION_EXAMS]['data']['cidReq'] = $extraParams['cidReq'];
-            } else {
+            } else { // A General report
                 if (api_is_platform_admin()) {
                     /*
                      * Administrator have the next actions:
                      * My progress, My space(teacher), My space (admin), Exercise tacking, Current course reports
+                     * If have right session_id and display, then show the import user action
                      * see - refs CT#7382
                      */
+                    $actions[REPORT_ACTION_MY_PROGRESS] = false;
+                    $actions[REPORT_ACTION_MY_SPACE_TEACHER] = false;
+                    $actions[REPORT_ACTION_MY_SPACE_ADMIN] = false;
+                    $actions[REPORT_ACTION_EXAMS] = false;
+                    $actions[REPORT_ACTION_CURRENT_COURSES] = false;
                     if (
                         isset($extraParams['data']['session_id']) &&
                         !empty($extraParams['data']['session_id']) &&
@@ -2887,15 +2941,10 @@ class MySpace
                     ) {
                         $actions[REPORT_ACTION_IMPORT_USER] = false;
                     }
-                    $actions[REPORT_ACTION_MY_PROGRESS] = false;
-                    $actions[REPORT_ACTION_MY_SPACE_TEACHER] = false;
-                    $actions[REPORT_ACTION_MY_SPACE_ADMIN] = false;
-                    $actions[REPORT_ACTION_EXAMS] = false;
-                    $actions[REPORT_ACTION_CURRENT_COURSES] = false;
                 } elseif (api_is_drh()) {
                     /*
                      * Human Resource Director have the next actions:
-                     * My progress, My space(teacher), Students, Teachers,
+                     * My progress, My space(DRH), Teachers,
                      * Course, Session, Company reports, Company reports summary
                      * see - refs CT#7382
                      */
@@ -2911,6 +2960,7 @@ class MySpace
                     /*
                      * Teacher have the next actions:
                      * My progress, My space(teacher)
+                     * If have right session_id and display, then show the Back action
                      * see - refs CT#7382
                      */
 
@@ -2964,18 +3014,21 @@ class MySpace
             }
 
             if (
+                // Check the user have 2 or mor action to show them
                 isset($actions) && (
                     is_array($actions) &&
                     count($actions) > 1
                 )
             ) {
+                // Disable the current action
                 $actions[$currentAction] = true;
+                // Join action items
                 foreach ($actions as $action => $isDisabled) {
                     $html .= self::getActionItem($action, $isDisabled, $extraParams[$action]);
                 }
                 // Add options (e.g Print, Export to CSV)
                 $html .= self::getActionOption($currentAction, $extraParams);
-                // Check if should use action div
+                // Check if should use or not, the action div
                 if (is_array($extraParams) && isset($extraParams['noDiv']) && $extraParams['noDiv']) {
                     // Nothing to do
                 } else {

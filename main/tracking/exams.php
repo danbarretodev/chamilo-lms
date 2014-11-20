@@ -11,11 +11,7 @@
 $language_file = array('registration', 'index', 'tracking', 'exercice','survey');
 require_once '../inc/global.inc.php';
 require_once api_get_path(LIBRARY_PATH).'pear/Spreadsheet_Excel_Writer/Writer.php';
-$interbreadcrumb[] = array (
-    'url' => api_get_path(WEB_CODE_PATH) .
-        'mySpace/index.php',
-    'name' => get_lang('MySpace')
-);
+
 $toolTable = Database::get_course_table(TABLE_TOOL_LIST);
 $quizTable = Database::get_course_table(TABLE_QUIZ_TEST);
 $this_section = SECTION_TRACKING;
@@ -38,12 +34,20 @@ if (api_is_platform_admin() && empty($_GET['cidReq'])) {
 
 $courseList = array();
 if ($global) {
+    // Only add breadcrumb for general reports
+    $interbreadcrumb[] = array (
+        'url' => api_get_path(WEB_CODE_PATH) .
+            'mySpace/index.php',
+        'name' => get_lang('MySpace')
+    );
+    $nameTools = get_lang('ExamTracking');
     $temp = CourseManager::get_courses_list();
     foreach ($temp as $tempCourse) {
         $courseInfo = api_get_course_info($tempCourse['code']);
         $courseList[] = $courseInfo;
     }
 } else {
+    $nameTools = get_lang('MySpace');
     $courseList = array(api_get_course_info());
 }
 
@@ -55,7 +59,13 @@ if (empty($sessionId)) {
     $sessionCondition = api_get_session_condition($sessionId, true, true);
 }
 
-$form = new FormValidator('search_simple', 'POST', '', '', null, false);
+if ($global) {
+    $formAction = '';
+} else {
+    $formAction = api_get_self() . '?' . api_get_cidreq();
+}
+
+$form = new FormValidator('search_simple', 'POST', $formAction, '', null, false);
 $form->addElement('text', 'score', get_lang('Percentage'));
 if ($global) {
     $form->addElement('hidden', 'view', 'admin');
@@ -89,7 +99,7 @@ $form->setDefaults(array('score' => $filter_score));
 $currentAction = REPORT_ACTION_EXAMS;
 
 if (!$exportToXLS) {
-    Display :: display_header(get_lang('ExamTracking'));
+    Display :: display_header($nameTools);
     $actionParams[REPORT_ACTION_EXPORT_XLS] = array(
         'url' => api_get_self() .
             '?export=1&score=' . $filter_score .

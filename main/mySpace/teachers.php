@@ -26,10 +26,10 @@ $interbreadcrumb[] = array ("url" => "index.php", "name" => get_lang('MySpace'))
 
 if (isset($_GET["user_id"]) && $_GET["user_id"] != "" && !isset($_GET["type"])) {
     $interbreadcrumb[] = array ("url" => "teachers.php", "name" => get_lang('Teachers'));
-}
-
-if (isset($_GET["user_id"]) && $_GET["user_id"]!="" && isset($_GET["type"]) && $_GET["type"] == "coach") {
+} elseif (isset($_GET["user_id"]) && $_GET["user_id"] != "" && isset($_GET["type"]) && $_GET["type"] == "coach") {
     $interbreadcrumb[] = array ("url" => "coaches.php", "name" => get_lang('Tutors'));
+} else {
+    $nameTools = get_lang('Teachers');
 }
 
 function get_count_users()
