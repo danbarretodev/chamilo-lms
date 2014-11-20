@@ -23,8 +23,6 @@ if ($type == 'course') {
     api_protect_course_script(true);
 }
 
-$group_id = api_get_group_id();
-
 $is_group_tutor = GroupManager::is_tutor_of_group(api_get_user_id(), $group_id);
 
 $agenda = new Agenda();
@@ -94,6 +92,10 @@ switch ($action) {
         $filter = isset($_REQUEST['user_id']) ? $_REQUEST['user_id'] : null;
         $result = $agenda->parseAgendaFilter($filter);
         $groupId = current($result['groups']);
+        // If groupId by filter is empty, use Chamilo group id - see CT#7411
+        if (empty($groupId)) {
+            $groupId = $group_id;
+        }
         $userId = current($result['users']);
 
         $start = isset($_REQUEST['start']) ? $_REQUEST['start'] : null;
