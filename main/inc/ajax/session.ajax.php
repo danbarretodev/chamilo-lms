@@ -3,7 +3,6 @@
 /**
  * Responses to AJAX calls
  */
-
 $language_file[] = 'admin';
 require_once '../global.inc.php';
 
@@ -16,7 +15,7 @@ switch ($action) {
             $list_sessions = SessionManager::get_sessions_by_user($user_id, true);
             if (!empty($list_sessions)) {
                 foreach ($list_sessions as $session_item) {
-                    echo $session_item['session_name'].'<br />';
+                    echo $session_item['session_name'] . '<br />';
                 }
             } else {
                 echo get_lang('NoSessionsForThisUser');
@@ -27,7 +26,7 @@ switch ($action) {
     case 'search_session':
         if (api_is_platform_admin()) {
             $results = SessionManager::get_sessions_list(
-                array('s.name' => array('operator' => 'LIKE', 'value' => "%".$_REQUEST['q']."%"))
+                array('s.name LIKE' => "%" . $_REQUEST['q'] . "%")
             );
             $results2 = array();
             if (!empty($results)) {
@@ -119,14 +118,14 @@ switch ($action) {
         if (class_exists('AdvancedSessionsPlugin') && AdvancedSessionsPlugin::hasDescriptionField()) {
             $sessionInfo = api_get_session_info($sessionId);
             ?>
-                <h2><?php echo $sessionInfo['name'] ?></h2><br>
-                <div class="home-course-intro">
-                    <div class="page-course">
-                        <div class="page-course-intro">
-                            <p><?php echo AdvancedSessionsPlugin::getSessionDescription($sessionId) ?></p>
-                        </div>
+            <h2><?php echo $sessionInfo['name'] ?></h2><br>
+            <div class="home-course-intro">
+                <div class="page-course">
+                    <div class="page-course-intro">
+                        <p><?php echo AdvancedSessionsPlugin::getSessionDescription($sessionId) ?></p>
                     </div>
                 </div>
+            </div>
             <?php
         }
     default:
