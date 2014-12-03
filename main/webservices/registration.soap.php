@@ -14,6 +14,8 @@ require_once $libpath.'add_course.lib.inc.php';
 $debug = false;
 
 define('WS_ERROR_SECRET_KEY', 1);
+define('WS_ERROR_NOT_FOUND_RESULT', 2);
+define('WS_ERROR_INVALID_INPUT', 3);
 
 function return_error($code) {
     $fault = null;
@@ -21,6 +23,12 @@ function return_error($code) {
         case WS_ERROR_SECRET_KEY:
             $fault = new soap_fault('Server', '', 'Secret key is not correct or params are not correctly set');
         break;
+        case WS_ERROR_NOT_FOUND_RESULT:
+            $fault = new soap_fault('Server', '', 'Not found any result from the query');
+            break;
+        case WS_ERROR_INVALID_INPUT:
+            $fault = new soap_fault('Server', '', 'The input variables are invalid o are not correctly set');
+            break;
     }
     return $fault;
 }
