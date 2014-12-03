@@ -256,7 +256,10 @@ class ExtraFieldValue extends Model
 
             $params['field_value'] = $value_to_insert;
             $params['tms'] = api_get_utc_datetime();
-            $params[$this->author_id] = api_get_user_id();
+
+            if ($this->handler_id !== 'session_id') {
+                $params[$this->author_id] = api_get_user_id();
+            }
 
             // Insert
             if (empty($field_values)) {
