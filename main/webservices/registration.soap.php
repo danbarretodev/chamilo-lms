@@ -1600,7 +1600,7 @@ function WSEditUserWithPicture($params) {
     // Get user id from id wiener
 
     $user_id = UserManager::get_user_id_from_original_id($original_user_id_value, $original_user_id_name);
-    
+
     // Get picture and generate uri.
     $filename = basename($picture_url);
     $tempdir = sys_get_temp_dir();
@@ -5428,7 +5428,7 @@ $server->wsdl->addComplexType(
     'SOAP-ENC:Array',
     array(),
     array(
-        array('ref'=>'SOAP:ENC:arrayType',
+        array('ref'=>'SOAP-ENC:arrayType',
             'wsdl:arrayType'=>'tns:session[]')
     ),
     'tns:session'
