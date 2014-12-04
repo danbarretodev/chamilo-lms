@@ -1351,7 +1351,8 @@ class SessionManager
         $end_limit = true,
         $description = null,
         $showDescription = null,
-        $duration = null
+        $duration = null,
+        $extraFields = array()
     ) {
         $name = trim(stripslashes($name));
         $year_start = intval($year_start);
@@ -1461,6 +1462,12 @@ class SessionManager
 					  WHERE id='$id'";
 
                 Database::query($sql);
+
+                $extraFields['session_id'] = $id;
+
+                $sessionFieldValue = new SessionFieldValue();
+                $sessionFieldValue->save_field_values($extraFields);
+
                 return $id;
             }
         }
