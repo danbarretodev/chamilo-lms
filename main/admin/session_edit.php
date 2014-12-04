@@ -58,26 +58,275 @@ $end_year_disabled = $end_month_disabled = $end_day_disabled = '';
 
 if (isset($_POST['formSent']) && $_POST['formSent']) {
 	$formSent = 1;
+}
 
-	$name                  = $_POST['name'];
-	$year_start            = $_POST['year_start'];
-	$month_start           = $_POST['month_start'];
-	$day_start             = $_POST['day_start'];
-	$year_end              = $_POST['year_end'];
-	$month_end             = $_POST['month_end'];
-	$day_end               = $_POST['day_end'];
-	$nb_days_acess_before  = $_POST['nb_days_access_before'];
-	$nb_days_acess_after   = $_POST['nb_days_access_after'];
-	//$nolimit               = $_POST['nolimit'];
-	$id_coach              = $_POST['id_coach'];
-	$id_session_category   = $_POST['session_category'];
-	$id_visibility         = $_POST['session_visibility'];
-    $duration = isset($_POST['duration']) ? $_POST['duration'] : null;
-    $description = isset($_POST['description']) ? $_POST['description'] : null;
-    $showDescription = isset($_POST['show_description']) ? 1 : 0;
+$order_clause = 'ORDER BY ';
+$order_clause .= api_sort_by_first_name() ? 'firstname, lastname, username' : 'lastname, firstname, username';
 
-    $end_limit              = $_POST['end_limit'];
-    $start_limit            = $_POST['start_limit'];
+$sql="SELECT user_id,lastname,firstname,username FROM $tbl_user WHERE status='1'".$order_clause;
+
+if (api_is_multiple_url_enabled()) {
+	$table_access_url_rel_user= Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_USER);
+	$access_url_id = api_get_current_access_url_id();
+	if ($access_url_id != -1) {
+		$sql="SELECT DISTINCT u.user_id,lastname,firstname,username FROM $tbl_user u INNER JOIN $table_access_url_rel_user url_rel_user ON (url_rel_user.user_id = u.user_id)
+			  WHERE status='1' AND access_url_id = '$access_url_id' $order_clause";
+	}
+}
+
+$result     = Database::query($sql);
+$Coaches    = Database::store_result($result);
+$thisYear   = date('Y');
+
+$daysOption = array();
+
+for ($i = 1; $i <= 31; $i++) {
+    $day = sprintf("%02d", $i);
+    $daysOption[$day] = $day;
+}
+
+$monthsOption = array();
+
+for ($i = 1; $i <= 12; $i++) {
+    $month = sprintf("%02d", $i);
+    
+    $monthsOption[$month] = $month;
+}
+
+$yearsOption = array();
+
+for ($i = $thisYear - 5; $i <= ($thisYear + 5); $i++) {
+    $yearsOption[$i] = $i;
+}
+
+$coachesOption = array(
+    '' => '----- ' . get_lang('None') . ' -----'
+);
+
+foreach ($Coaches as $coach) {
+    $personName = api_get_person_name($coach['firstname'], $coach['lastname']);
+
+    $coachesOption[$coach['user_id']] = "$personName ({$coach['username']})";
+}
+
+$Categories = SessionManager::get_all_session_category();
+
+$categoriesOption = array(
+    '0' => get_lang('None')
+);
+
+if ($Categories != false) {
+    foreach ($categoriesList as $categoryItem) {
+        $categoriesOption[$categoryItem['id']] = $categoryItem['name'];
+    }
+}
+
+$formAction = api_get_self() . '?';
+$formAction .= http_build_query(array(
+    'page' => Security::remove_XSS($_GET['page']),
+    'id' => $id
+));
+
+$form = new FormValidator('edit_session', 'post', $formAction);
+
+$form->addElement('header', $tool_name);
+
+$form->addElement('text', 'name', get_lang('SessionName'), array(
+    'class' => 'span4',
+    'maxlength' => 50,
+    'value' => $formSent ? api_htmlentities($name,ENT_QUOTES,$charset) : ''
+));
+$form->addRule('name', get_lang('ThisFieldIsRequired'), 'required');
+$form->addRule('name', get_lang('SessionNameAlreadyExists'), 'callback', 'check_session_name');
+
+$form->addElement('select', 'id_coach', get_lang('CoachName'), $coachesOption, array(
+    'id' => 'coach_username',
+    'class' => 'chzn-select',
+    'style' => 'width:370px;',
+    'title' => get_lang('Choose')
+));
+$form->addRule('id_coach', get_lang('ThisFieldIsRequired'), 'required');
+
+$form->add_select('session_category', get_lang('SessionCategory'), $categoriesOption, array(
+    'id' => 'session_category',
+    'class' => 'chzn-select',
+    'style' => 'width:370px;'
+));
+
+$form->addElement('advanced_settings','<a class="btn-show" id="show-options" href="#">'.get_lang('DefineSessionOptions').'</a>');
+
+if ($infos['nb_days_access_before_beginning'] != 0 || $infos['nb_days_access_after_end'] != 0) {
+    $form->addElement('html','<div id="options" style="display:block;">');
+} else {
+    $form->addElement('html','<div id="options" style="display:none;">');
+}
+
+$form->addElement('text', 'nb_days_access_before', get_lang('DaysBefore'), array(
+    'style' => 'width: 30px;'
+));
+
+$form->addElement('text', 'nb_days_access_after', get_lang('DaysAfter'), array(
+    'style' => 'width: 30px;'
+));
+
+$form->addElement('html','</div>');
+
+if ($year_start!="0000") {
+    $form->addElement('checkbox', 'start_limit', '', get_lang('DateStartSession'), array(
+        'onchange' => 'disable_starttime(this)',
+        'id' => 'start_limit',
+        'checked' => ''
+    ));
+
+    $form->addElement('html','<div id="start_date" style="display:block">');
+} else {
+    $form->addElement('checkbox', 'start_limit', '', get_lang('DateStartSession'), array(
+        'onchange' => 'disable_starttime(this)',
+        'id' => 'start_limit'
+    ));
+
+    $form->addElement('html','<div id="start_date" style="display:none">');
+}
+
+$startDateGroup = array ();
+$startDateGroup[] = $form->createElement('select', 'day_start', null, $daysOption);
+$startDateGroup[] = $form->createElement('select', 'month_start', null, $monthsOption);
+$startDateGroup[] = $form->createElement('select', 'year_start', null, $yearsOption);
+
+$form->addGroup($startDateGroup, 'start_date_group', null, ' / ', true);
+
+$form->addElement('html','</div>');
+
+if ($year_end != "0000") {
+    $form->addElement('checkbox', 'end_limit', '', get_lang('DateEndSession'), array(
+        'onchange' => 'disable_endtime(this)',
+        'id' => 'end_limit',
+        'checked' => ''
+    ));
+
+    $form->addElement('html','<div id="end_date" style="display:block">');
+} else {
+    $form->addElement('checkbox', 'end_limit', '', get_lang('DateEndSession'), array(
+        'onchange' => 'disable_endtime(this)',
+        'id' => 'end_limit'
+    ));
+
+    $form->addElement('html','<div id="end_date" style="display:none">');
+}
+
+$endDateGroup = array();
+$endDateGroup[] = $form->createElement('select', 'day_end', null, $daysOption);
+$endDateGroup[] = $form->createElement('select', 'month_end', null, $monthsOption);
+$endDateGroup[] = $form->createElement('select', 'year_end', null, $yearsOption);
+
+$form->addGroup($endDateGroup, 'end_date_group', null, ' / ', true);
+
+$visibilityGroup = array();
+$visibilityGroup[] = $form->createElement('advanced_settings', get_lang('SessionVisibility'));
+$visibilityGroup[] = $form->createElement('select', 'session_visibility', null, array(
+    SESSION_VISIBLE_READ_ONLY => get_lang('SessionReadOnly'),
+    SESSION_VISIBLE => get_lang('SessionAccessible'),
+    SESSION_INVISIBLE => api_ucfirst(get_lang('SessionNotAccessible'))
+), array(
+    'style' => 'width:250px;'
+));
+
+$form->addGroup($visibilityGroup, 'visibility_group', null, null, false);
+
+$form->addElement('html','</div>');
+
+if (array_key_exists('show_description', $infos)) {
+    $form->addElement('textarea', 'description', get_lang('Description'));
+
+    $chkDescriptionAttributes = array();
+
+    if (!empty($showDescriptionChecked)) {
+        $chkDescriptionAttributes['checked'] = '';
+    }
+
+    $form->addElement('checkbox', 'show_description', null, get_lang('ShowDescription'), $chkDescriptionAttributes);
+}
+
+if (SessionManager::durationPerUserIsEnabled()) {
+    $duration = empty($infos['duration']) ? null : $infos['duration'];
+
+    $form->addElement('text', 'duration', get_lang('SessionDurationTitle'), array(
+        'class' => 'span1',
+        'maxlength' => 50
+    ));
+    $form->addElement('advanced_settings', get_lang('SessionDurationDescription'));
+}
+
+//Extra fields
+$extra_field = new ExtraField('session');
+$extra = $extra_field->addElements($form, $id);
+
+$htmlHeadXtra[] ='
+<script>
+
+$(function() {
+    '.$extra['jquery_ready_content'].'
+});
+</script>';
+
+$form->addElement('button', 'submit', get_lang('ModifyThisSession'), array(
+    'class' => 'save'
+));
+
+$formDefaults = array(
+    'id_coach' => $infos['id_coach'],
+    'session_category' => $infos['session_category_id'],
+    'start_date_group[day_start]' => $day_start,
+    'start_date_group[month_start]' => $month_start,
+    'start_date_group[year_start]' => $year_start,
+    'end_date_group[day_end]' => $day_end,
+    'end_date_group[month_end]' => $month_end,
+    'end_date_group[year_end]' => $year_end,
+    'session_visibility' => $infos['visibility'],
+    'description' => array_key_exists('show_description', $infos) ? $infos['description'] : ''
+);
+
+if ($formSent) {
+    $formDefaults['name'] = api_htmlentities($name,ENT_QUOTES,$charset);
+    $formDefaults['nb_days_access_before'] = api_htmlentities($nb_days_access_before,ENT_QUOTES,$charset);
+    $formDefaults['nb_days_access_after'] = api_htmlentities($nb_days_access_after,ENT_QUOTES,$charset);
+} else {
+    $formDefaults['name'] = api_htmlentities($infos['name'],ENT_QUOTES,$charset);
+    $formDefaults['nb_days_access_before'] = api_htmlentities($infos['nb_days_access_before_beginning'],ENT_QUOTES,$charset);
+    $formDefaults['nb_days_access_after'] = api_htmlentities($infos['nb_days_access_after_end'],ENT_QUOTES,$charset);
+}
+
+if (SessionManager::durationPerUserIsEnabled()) {
+    if ($formSent) {
+        $formDefaults['duration'] = Security::remove_XSS($duration);
+    } else {
+        $formDefaults['duration'] = $duration;
+    }
+}
+
+$form->setDefaults($formDefaults);
+
+if ($form->validate()) {
+    $params = $form->getSubmitValues();
+
+    $name = $params['name'];
+    $year_start = $params['start_date_group']['year_start'];
+    $month_start = $params['start_date_group']['month_start'];
+    $day_start = $params['start_date_group']['day_start'];
+    $year_end = $params['end_date_group']['year_end'];
+    $month_end = $params['end_date_group']['month_end'];
+    $day_end = $params['end_date_group']['day_end'];
+    $nb_days_acess_before = $params['nb_days_access_before'];
+    $nb_days_acess_after = $params['nb_days_acc ess_after'];
+    $id_coach = $params['id_coach'];
+    $id_session_category = $params['session_category'];
+    $id_visibility = $params['session_visibility'];
+    $duration = isset($params['duration']) ? $params['duration'] : null;
+    $description = isset($params['description']) ? $params['description'] : null;
+    $showDescription = isset($params['show_description']) ? 1: 0;
+
+    $end_limit = $params['end_limit'];
+    $start_limit = $params['start_limit'];
 
     if (empty($end_limit) && empty($start_limit)) {
         $nolimit = 1;
@@ -85,7 +334,15 @@ if (isset($_POST['formSent']) && $_POST['formSent']) {
         $nolimit = null;
     }
 
-	$return = SessionManager::edit_session(
+    $extraFields = array();
+
+    foreach ($params as $key => $value) {
+        if (strpos($key, 'extra_') === 0) {
+            $extraFields[$key] = $value;
+        }
+    }
+
+    $return = SessionManager::edit_session(
         $id,
         $name,
         $year_start,
@@ -104,7 +361,8 @@ if (isset($_POST['formSent']) && $_POST['formSent']) {
         $end_limit,
         $description,
         $showDescription,
-        $duration
+        $duration,
+        $extraFields
     );
 
 	if ($return == strval(intval($return))) {
@@ -116,22 +374,6 @@ if (isset($_POST['formSent']) && $_POST['formSent']) {
 		exit();
 	}
 }
-
-$order_clause = api_sort_by_first_name() ? ' ORDER BY firstname, lastname, username' : ' ORDER BY lastname, firstname, username';
-$sql="SELECT user_id,lastname,firstname,username FROM $tbl_user WHERE status='1'".$order_clause;
-
-if (api_is_multiple_url_enabled()) {
-	$table_access_url_rel_user= Database::get_main_table(TABLE_MAIN_ACCESS_URL_REL_USER);
-	$access_url_id = api_get_current_access_url_id();
-	if ($access_url_id != -1) {
-		$sql="SELECT DISTINCT u.user_id,lastname,firstname,username FROM $tbl_user u INNER JOIN $table_access_url_rel_user url_rel_user ON (url_rel_user.user_id = u.user_id)
-			  WHERE status='1' AND access_url_id = '$access_url_id' $order_clause";
-	}
-}
-
-$result     = Database::query($sql);
-$Coaches    = Database::store_result($result);
-$thisYear   = date('Y');
 
 // display the header
 Display::display_header($tool_name);
@@ -431,13 +673,8 @@ if (!empty($return)) {
         }
     ?>
 
-    <div class="control-group">
-        <div class="controls">
-            <button class="save" type="submit" value="<?php echo get_lang('ModifyThisSession') ?>"><?php echo get_lang('ModifyThisSession') ?></button>
-        </div>
-    </div>
-</fieldset>
-</form>
+$form->display();
+?>
 
 <script type="text/javascript">
 
@@ -493,6 +730,16 @@ function emptyDuration() {
         $('#duration').val('');
     }
 }
+
+$(document).on('ready', function (){
+    $('#show-options').on('click', function (e) {
+        e.preventDefault();
+
+        var display = $('#options').css('display');
+
+        display === 'block' ? $('#options').slideUp() : $('#options').slideDown() ;
+    });
+});
 
 </script>
 <?php
