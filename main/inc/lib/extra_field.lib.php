@@ -1131,6 +1131,14 @@ EOF;
                         $form->applyFilter('extra_'.$field_details['field_variable'], 'stripslashes');
                         $form->applyFilter('extra_'.$field_details['field_variable'], 'trim');
 
+                        $allowed_picture_types = array ('jpg', 'jpeg', 'png', 'gif');
+                        $form->addRule(
+                            'extra_'.$field_details['field_variable'],
+                            get_lang('OnlyImagesAllowed') . ' ('.implode(',', $allowed_picture_types).')',
+                            'filetype',
+                            $allowed_picture_types
+                        );
+
                         if (!$admin_permissions) {
                             if ($field_details['field_visible'] == 0) {
                                 $form->freeze(
