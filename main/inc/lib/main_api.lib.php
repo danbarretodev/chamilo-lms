@@ -43,6 +43,7 @@ define('SESSION_GENERAL_COACH', 13);
 define('COURSE_STUDENT', 14);   //student subscribed in a course
 define('SESSION_STUDENT', 15);  //student subscribed in a session course
 define('COURSE_TUTOR', 16); // student is tutor of a course (NOT in session)
+define('STUDENT_BOSS', 17); // student is boss
 
 // Table of status
 $_status_list[COURSEMANAGER]    = 'teacher';        // 1
@@ -323,6 +324,7 @@ define('USER_RELATION_TYPE_GOODFRIEND', 4); // should be deprecated is useless
 define('USER_RELATION_TYPE_ENEMY',      5); // should be deprecated is useless
 define('USER_RELATION_TYPE_DELETED',    6);
 define('USER_RELATION_TYPE_RRHH',       7);
+define('USER_RELATION_TYPE_BOSS',       8);
 
 //Gradebook link constants
 //Please do not change existing values, they are used in the database !
@@ -7519,4 +7521,14 @@ function api_set_site_use_cookie_warning_cookie()
 function api_site_use_cookie_warning_cookie_exist()
 {
     return isset($_COOKIE['ChamiloUsesCookies']);
+}
+
+/**
+ * Return true if the user is student boss
+ * @return bool
+ */
+function api_is_student_boss () {
+    global $_user;
+
+    return isset($_user['status']) && $_user['status'] == STUDENT_BOSS;
 }
