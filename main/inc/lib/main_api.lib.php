@@ -4673,7 +4673,8 @@ function api_get_status_langvars() {
         SESSIONADMIN    => get_lang('SessionsAdmin', ''),
         DRH             => get_lang('Drh', ''),
         STUDENT         => get_lang('Student', ''),
-        ANONYMOUS       => get_lang('Anonymous', '')
+        ANONYMOUS       => get_lang('Anonymous', ''),
+        STUDENT_BOSS       => get_lang('RoleStudentBoss', '')
     );
 }
 
