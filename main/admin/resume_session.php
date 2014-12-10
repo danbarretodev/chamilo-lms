@@ -261,7 +261,7 @@ foreach ($sessionFields as $field) {
                                     $field['field_display_text'],
                                     array('width' => '300')
                                 );
-                                
+
                                 echo Display::url(
                                     $image,
                                     api_get_path(WEB_CODE_PATH) . $sesionValueData['field_value'],
