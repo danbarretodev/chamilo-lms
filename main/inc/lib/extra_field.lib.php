@@ -719,6 +719,11 @@ class ExtraField extends Model
                     case ExtraField::FIELD_TYPE_SELECT:
                         $get_lang_variables = false;
 
+                        // Get extra field workflow
+                        $userInfo = api_get_user_info();
+
+                        $addOptions = array();
+
                         global $app;
                         $optionsExists = $app['orm.em']->getRepository('ChamiloLMS\Entity\ExtraFieldOptionRelFieldOption')->
                         findOneBy(array('fieldId' => $field_details['id']));
@@ -738,6 +743,11 @@ class ExtraField extends Model
                                     $addOptions[] = $item->getFieldOptionId();
                                 }
                             }
+                        }
+
+                        if (in_array($field_details['field_variable'],
+                                array('mail_notify_message', 'mail_notify_invitation', 'mail_notify_group_message'))) {
+                            $get_lang_variables = true;
                         }
 
                         $options = array();
