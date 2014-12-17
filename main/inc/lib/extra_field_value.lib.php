@@ -31,8 +31,9 @@ class ExtraFieldValue extends Model
 
         switch ($this->type) {
             case 'calendar_event':
-                $this->table = Database::get_main_table(TABLE_MAIN_CALENDAR_EVENT_VALUES);
-                $this->table_handler_field = Database::get_main_table(TABLE_MAIN_CALENDAR_EVENT_FIELD);
+                $this->table = Database::get_main_table(TABLE_MAIN_CALENDAR_EVENT_FIELD);
+                $this->table_field_values = Database::get_main_table(TABLE_MAIN_CALENDAR_EVENT_FIELD);
+                $this->table_field_values  = Database::get_main_table(TABLE_MAIN_COURSE_FIELD_VALUES);
                 $this->author_id = 'user_id';
                 break;
             case 'course':
