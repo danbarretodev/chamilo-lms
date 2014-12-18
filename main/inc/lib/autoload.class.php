@@ -996,6 +996,17 @@ class Autoload
         $result['vtimezone'] = '/main/inc/lib/icalcreator/iCalcreator.class.php';
         $result['vtodo'] = '/main/inc/lib/icalcreator/iCalcreator.class.php';
         $result['xhtdoc'] = '/main/inc/lib/xht.lib.php';
+        $result['HookCreateUserSubjectInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookCreateUserObserverInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookUpdateUserSubjectInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookUpdateUserObserverInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookEventInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookManagementInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookEvent'] = '/main/inc/lib/hook/HookEvent.class.php';
+        $result['HookObserver'] = '/main/inc/lib/hook/HookObserver.class.php';
+        $result['HookCreateUser'] = '/main/inc/lib/hook/HookCreateUser.class.php';
+        $result['HookUpdateUser'] = '/main/inc/lib/hook/HookUpdateUser.class.php';
+        $result['HookManagementPlugin'] = '/plugin/hookmanagement/src/HookManagementPlugin.class.php';
 
 
         return $result;
