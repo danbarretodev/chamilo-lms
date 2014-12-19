@@ -9,6 +9,8 @@
 class Autoload
 {
 
+    public static $map = false;
+
     static private $is_registered = false;
 
     /**
@@ -34,10 +36,8 @@ class Autoload
 
     static public function &map()
     {
-        static $result = false;
-
-        if ($result) {
-            return $result;
+        if (self::$map) {
+            return self::$map;
         }
 
         $root = dirname(__FILE__) . '/../../';
@@ -1000,16 +1000,20 @@ class Autoload
         $result['HookCreateUserObserverInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
         $result['HookUpdateUserSubjectInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
         $result['HookUpdateUserObserverInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookAdminBlockObserverInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookAdminBlockObserverInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
         $result['HookEventInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookPluginInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
         $result['HookManagementInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
         $result['HookEvent'] = '/main/inc/lib/hook/HookEvent.class.php';
         $result['HookObserver'] = '/main/inc/lib/hook/HookObserver.class.php';
         $result['HookCreateUser'] = '/main/inc/lib/hook/HookCreateUser.class.php';
         $result['HookUpdateUser'] = '/main/inc/lib/hook/HookUpdateUser.class.php';
+        $result['HookAdminBlock'] = '/main/inc/lib/hook/HookAdminBlock.class.php';
         $result['HookManagementPlugin'] = '/plugin/hookmanagement/src/HookManagementPlugin.class.php';
+        self::$map = $result;
 
-
-        return $result;
+        return self::$map;
     }
 
     /**
