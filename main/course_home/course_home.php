@@ -133,11 +133,21 @@ define('TOOL_DRH', 'tool_drh');
 define('TOOL_STUDENT_VIEW', 'toolstudentview');
 define('TOOL_ADMIN_VISIBLE', 'tooladminvisible');
 
-$user_id = api_get_user_id();
-$course_code = api_get_course_id();
+$user_id 		= api_get_user_id();
+$course_code 	= api_get_course_id();
+$sessionId      = api_get_session_id();
 $show_message = '';
 
-// Deleting group session
+if (api_is_invited_user()) {
+    $isInASession = $sessionId > 0;
+    $isSubscribed = CourseManager::is_user_subscribed_in_course($user_id, $course_code, $isInASession, $sessionId);
+
+    if (!$isSubscribed) {
+        api_not_allowed(true);
+    }
+}
+
+//Deleting group session
 Session::erase('toolgroup');
 Session::erase('_gid');
 
