@@ -44,6 +44,7 @@ define('COURSE_STUDENT', 14);   //student subscribed in a course
 define('SESSION_STUDENT', 15);  //student subscribed in a session course
 define('COURSE_TUTOR', 16); // student is tutor of a course (NOT in session)
 define('STUDENT_BOSS', 17); // student is boss
+define('ROLE_INVITED', 20);
 
 // Table of status
 $_status_list[COURSEMANAGER]    = 'teacher';        // 1
@@ -51,6 +52,7 @@ $_status_list[SESSIONADMIN]     = 'session_admin';  // 3
 $_status_list[DRH]              = 'drh';            // 4
 $_status_list[STUDENT]          = 'user';           // 5
 $_status_list[ANONYMOUS]        = 'anonymous';      // 6
+$_status_list[ROLE_INVITED]     = 'invited';        // 20
 
 // COURSE VISIBILITY CONSTANTS
 /** only visible for course admin */
@@ -2566,6 +2568,16 @@ function api_is_student() {
 function api_is_teacher() {
     global $_user;
     return isset($_user['status']) && $_user['status'] == COURSEMANAGER;
+}
+
+/**
+ * Checks whether the current user is a invited user
+ * @return boolean
+ */
+function api_is_invited_user() {
+    global $_user;
+
+    return isset($_user['status']) && $_user['status'] == ROLE_INVITED;
 }
 
 /**
