@@ -4003,36 +4003,40 @@ class learnpathItem
                     }
 
                     if ($this->type == 'sco') {
-                        //IF scorm scorm_update_time has already updated total_time in db
-                        //" . //start_time = ".$this->get_current_start_time().", " . //scorm_init_time does it
-                        ////" max_time_allowed = '".$this->get_max_time_allowed()."'," .
-                        $sql = "UPDATE $item_view_table SET
-                                    score = " . $this->get_score() . ",
-                                    $my_status
-                                    max_score = '" . $this->get_max() . "',
-                                    suspend_data = '" . Database::escape_string($this->current_data) . "',
-                                    lesson_location = '" . $this->lesson_location . "'
-                                WHERE
-                                    c_id = $course_id AND
-                                    lp_item_id = " . $this->db_id . " AND
-                                    lp_view_id = " . $this->view_id . "  AND
-                                    view_count = " . $this->get_attempt_id();
+                        if (!api_is_invited_user()) {
+                            //IF scorm scorm_update_time has already updated total_time in db
+                            //" . //start_time = ".$this->get_current_start_time().", " . //scorm_init_time does it
+                            ////" max_time_allowed = '".$this->get_max_time_allowed()."'," .
+                            $sql = "UPDATE $item_view_table SET
+                                        score = " . $this->get_score() . ",
+                                        $my_status
+                                        max_score = '" . $this->get_max() . "',
+                                        suspend_data = '" . Database::escape_string($this->current_data) . "',
+                                        lesson_location = '" . $this->lesson_location . "'
+                                    WHERE
+                                        c_id = $course_id AND
+                                        lp_item_id = " . $this->db_id . "AND
+                                        lp_view_id = " . $this->view_id . "  AND
+                                        view_count = " . $this->get_attempt_id();
+                        }
 
                     } else {
-                        //" max_time_allowed = '".$this->get_max_time_allowed()."'," .
-                        $sql = "UPDATE $item_view_table SET
-                                    $total_time
-                                    start_time = " . $this->get_current_start_time() . ",
-                                    score = " . $this->get_score() . ",
-                                    $my_status
-                                    max_score = '" . $this->get_max() . "',
-                                    suspend_data = '" . Database::escape_string($this->current_data) . "',
-                                    lesson_location = '" . $this->lesson_location . "'
-                                WHERE
-                                    c_id = $course_id AND
-                                    lp_item_id = " . $this->db_id . " AND
-                                    lp_view_id = " . $this->view_id . " AND
-                                    view_count = " . $this->get_attempt_id();
+                        if (!api_is_invited_user()) {
+                            //" max_time_allowed = '".$this->get_max_time_allowed()."'," .
+                            $sql = "UPDATE $item_view_table SET
+                                        $total_time
+                                        start_time = " . $this->get_current_start_time() . ",
+                                        score = " . $this->get_score() . ",
+                                        $my_status
+                                        max_score = '" . $this->get_max() . "',
+                                        suspend_data = '" . Database::escape_string($this->current_data) . "',
+                                        lesson_location = '" . $this->lesson_location . "'
+                                    WHERE
+                                        c_id = $course_id AND
+                                        lp_item_id = " . $this->db_id . " AND
+                                        lp_view_id = " . $this->view_id . " AND
+                                        view_count = " . $this->get_attempt_id();
+                        }
                     }
                     $this->current_start_time = time();
                 }
@@ -4042,7 +4046,9 @@ class learnpathItem
                         0
                     );
                 }
-                Database::query($sql);
+                if (!empty($sql)) {
+                    Database::query($sql);
+                }
             }
 
             if (is_array($this->interactions) && count($this->interactions) > 0) {
