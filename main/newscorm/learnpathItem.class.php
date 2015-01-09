@@ -3840,7 +3840,7 @@ class learnpathItem
             $check_res = Database::query($check);
             // Depending on what we want (really), we'll update or insert a new row
             // now save into DB.
-            if (!$inserted && Database::num_rows($check_res) < 1) {
+            if (!$inserted && Database::num_rows($check_res) < 1 && !apiIsInvitedUser()) {
                 $params = array(
                     "c_id" => $course_id,
                     "total_time" => $this->get_total_time(),
@@ -4003,7 +4003,7 @@ class learnpathItem
                     }
 
                     if ($this->type == 'sco') {
-                        if (!api_is_invited_user()) {
+                        if (!apiIsInvitedUser()) {
                             //IF scorm scorm_update_time has already updated total_time in db
                             //" . //start_time = ".$this->get_current_start_time().", " . //scorm_init_time does it
                             ////" max_time_allowed = '".$this->get_max_time_allowed()."'," .
@@ -4021,7 +4021,7 @@ class learnpathItem
                         }
 
                     } else {
-                        if (!api_is_invited_user()) {
+                        if (!apiIsInvitedUser()) {
                             //" max_time_allowed = '".$this->get_max_time_allowed()."'," .
                             $sql = "UPDATE $item_view_table SET
                                         $total_time
