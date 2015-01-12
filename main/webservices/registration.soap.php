@@ -89,6 +89,17 @@ function WSHelperVerifyKey($params)
 // Create the server instance
 $server = new soap_server();
 
+/** @var HookWSRegistration $hook */
+$hook = HookWSRegistration::create();
+if (!empty($hook)) {
+    $hook->setEventData(array('server' => $server));
+    $hook->notifyWSRegistration(HOOK_TYPE_PRE);
+    $res = $hook->getEventData();
+    if (!empty($res['server'])) {
+        $server = $res['server'];
+    }
+}
+
 $server->soap_defencoding = 'UTF-8';
 
 // Initialize WSDL support
@@ -5542,103 +5553,15 @@ function WSUserSubscribedInCourse ($params)
     return (CourseManager::is_user_subscribed_in_course($userId,$courseCode));
 }
 
-/** WSSessionListInCategory */
-
-// Output params for WSSessionListInCategory
-$server->wsdl->addComplexType(
-    'sessionBrief',
-    'complexType',
-    'struct',
-    'all',
-    '',
-    array(
-        'name' => array('name' => 'name', 'type' => 'xsd:string'), //Course string code
-        'description' => array('name' => 'description', 'type' => 'xsd:string'), //Chamilo user_id
-        'date_start' => array('name' => 'start_date', 'type' => 'xsd:string'),
-        'date_end' => array('name' => 'end_date', 'type' => 'xsd:string'),
-    )
-);
-
-$server->wsdl->addComplexType(
-    'sessionBriefList',
-    'complexType',
-    'array',
-    '',
-    'SOAP-ENC:Array',
-    array(),
-    array(
-        array('ref'=>'SOAP-ENC:arrayType',
-            'wsdl:arrayType'=>'tns:sessionBrief[]')
-    ),
-    'tns:sessionBrief'
-);
-
-// Input params for editing users
-$server->wsdl->addComplexType(
-    'sessionCategoryInput',
-    'complexType',
-    'struct',
-    'all',
-    '',
-    array(
-        'id' => array('name' => 'id', 'type' => 'xsd:string'), //Course string code
-        'name' => array('name' => 'name', 'type' => 'xsd:string'), //Chamilo user_id
-        'secret_key'   => array('name' => 'secret_key', 'type' => 'xsd:string')
-    )
-);
-
-// Register the method to expose
-$server->register('WSSessionListInCategory', // method name
-    array('sessionCategoryInput' => 'tns:sessionCategoryInput'), // input parameters
-    array('return' => 'tns:sessionBriefList'), // output parameters
-    'urn:WSRegistration', // namespace
-    'urn:WSRegistration#WSSessionListInCategory', // soapaction
-    'rpc', // style
-    'encoded', // use
-    'This service checks if user assigned to course' // documentation
-);
-
-
-/**
- * @param $params
- * @return null|soap_fault
- */
-function WSSessionListInCategory($params) {
-    global $debug;
-
-    if ($debug) error_log('WSUserSubscribedInCourse');
-    if ($debug) error_log('Params '. print_r($params, 1));
-    if (!WSHelperVerifyKey($params)) {
-
-        return return_error(WS_ERROR_SECRET_KEY);
+// Add more webservices by Hooks
+if (!empty($hook)) {
+    $hook->setEventData(array('server' => $server));
+    $hook->notifyWSRegistration(HOOK_TYPE_POST);
+    $res = $hook->getEventData();
+    if (!empty($res['server'])) {
+        $server = $res['server'];
     }
-    // Check if category ID is set
-    if (!empty($params['id']) && empty($params['category_name'])) {
-        $sessionCategoryId = $params['id'];
-    } elseif (!empty($params['category_name'])) {
-        // Check if category name is set
-        $sessionCategoryId = SessionManager::getSessionCategoryIdByName($params['category_name']);
-        if (is_array($sessionCategoryId)) {
-            $sessionCategoryId = current($sessionCategoryId);
-        }
-    } else {
-        // Return soap fault Not valid input params
-
-        return return_error(WS_ERROR_INVALID_INPUT);
-    }
-
-    // Get the session brief List by category
-
-    $sessionList = SessionManager::getSessionBriefListByCategory($sessionCategoryId);
-
-    if (empty($sessionList)) {
-
-        return return_error(WS_ERROR_NOT_FOUND_RESULT);
-    }
-
-    return $sessionList;
 }
-
 
 // Use the request to (try to) invoke the service
 $HTTP_RAW_POST_DATA = isset($HTTP_RAW_POST_DATA) ? $HTTP_RAW_POST_DATA : '';
@@ -5651,5 +5574,3 @@ if (isset($_configuration['registration.soap.php.decode_utf8'])) {
     }
 }
 $server->service($HTTP_RAW_POST_DATA);
-
-

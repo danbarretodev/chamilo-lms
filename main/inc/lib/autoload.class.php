@@ -996,20 +996,29 @@ class Autoload
         $result['vtimezone'] = '/main/inc/lib/icalcreator/iCalcreator.class.php';
         $result['vtodo'] = '/main/inc/lib/icalcreator/iCalcreator.class.php';
         $result['xhtdoc'] = '/main/inc/lib/xht.lib.php';
-        $result['HookCreateUserSubjectInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        // Hook dual interfaces
+        $result['HookCreateUserEventInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
         $result['HookCreateUserObserverInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
-        $result['HookUpdateUserSubjectInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookUpdateUserEventInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
         $result['HookUpdateUserObserverInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookAdminBlockEventInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
         $result['HookAdminBlockObserverInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
-        $result['HookAdminBlockObserverInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookWSRegistrationEventInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookWSRegistrationObserverInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        // Hook main interfaces
         $result['HookEventInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        $result['HookObserverInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
         $result['HookPluginInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
         $result['HookManagementInterface'] = '/main/inc/lib/hook/HookInterfaces.php';
+        // Hook abstract classes
         $result['HookEvent'] = '/main/inc/lib/hook/HookEvent.class.php';
         $result['HookObserver'] = '/main/inc/lib/hook/HookObserver.class.php';
+        // Hook Events
         $result['HookCreateUser'] = '/main/inc/lib/hook/HookCreateUser.class.php';
         $result['HookUpdateUser'] = '/main/inc/lib/hook/HookUpdateUser.class.php';
         $result['HookAdminBlock'] = '/main/inc/lib/hook/HookAdminBlock.class.php';
+        $result['HookWSRegistration'] = '/main/inc/lib/hook/HookWSRegistration.class.php';
+        // Main Hook Plugin
         $result['HookManagementPlugin'] = '/plugin/hookmanagement/src/HookManagementPlugin.class.php';
         self::$map = $result;
 
