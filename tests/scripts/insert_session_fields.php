@@ -154,3 +154,13 @@ $brochure->save(array(
     'field_visible' => 1,
     'field_changeable' => 1
 ));
+
+$publicoObjetivo = new ExtraField('session');
+$publicoObjetivo->save(array(
+    'field_type' => ExtraField::FIELD_TYPE_SELECT,
+    'field_variable' => 'publico_objetivo',
+    'field_display_text' => 'Público objetivo',
+    'field_visible' => 1,
+    'field_changeable' => 1,
+    'field_options' => 'Minedu; Regiones'
+));
