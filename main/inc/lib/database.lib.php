@@ -473,7 +473,7 @@ class Database
         // Fixes security problem when there's no "" or '' between a variable.
         // See #7440 for more info
         if ($addFix) {
-            $string = "__@$string@__";
+            //$string = "__@$string@__"; // there was bugs here when using Webservices, commented by now. - see BT#9090
         }
         return get_magic_quotes_gpc()
             ? (self::use_default_connection($connection)
