@@ -1025,7 +1025,7 @@ class Autoload
         $result['HookAdminBlock'] = '/main/inc/lib/hook/HookAdminBlock.class.php';
         $result['HookWSRegistration'] = '/main/inc/lib/hook/HookWSRegistration.class.php';
         // Main Hook Plugin
-        $result['HookManagementPlugin'] = '/plugin/hookmanagement/src/HookManagementPlugin.class.php';
+        $result['HookManagement'] = '/main/inc/lib/hook/HookManagement.class.php';
         self::$map = $result;
 
         return self::$map;
