@@ -591,7 +591,7 @@ class UserManager
     ) {
         $hook = HookUpdateUser::create();
         if (!empty($hook)) {
-            $hook->notifyCreateUser(HOOK_TYPE_PRE);
+            $hook->notifyUpdateUser(HOOK_TYPE_PRE);
         }
         global $_configuration;
         $original_password = $password;
@@ -702,7 +702,7 @@ class UserManager
         }
 
         if (!empty($hook)) {
-            $hook->notifyCreateUser(HOOK_TYPE_POST);
+            $hook->notifyUpdateUser(HOOK_TYPE_POST);
         }
 
         return $return;
@@ -5027,5 +5027,36 @@ EOF;
                 $userId, $userStatus, $getOnlyUserId, $getSql, $getCount, $from, $numberItems, $column, $direction,
                 $active, $lastConnectionDate, STUDENT_BOSS
         );
+    }
+
+    /**
+     * Get the boss user ID from a followed user id
+     * @param $userId
+     * @return bool
+     */
+    public static function getStudentBoss($userId)
+    {
+        $userId = intval($userId);
+        if ($userId !== 0) {
+            $userRelTable = Database::get_main_table(TABLE_MAIN_USER_REL_USER);
+            $row = Database::select(
+                'DISTINCT friend_user_id AS boss_id',
+                $userRelTable,
+                array(
+                    'where' => array(
+                        'user_id = ? AND relation_type = ? LIMIT 1' => array(
+                            $userId,
+                            USER_RELATION_TYPE_BOSS,
+                        )
+                    )
+                )
+            );
+            if (!empty($row)) {
+
+                return $row[0]['boss_id'];
+            }
+        }
+
+        return false;
     }
 }
