@@ -7520,7 +7520,6 @@ function api_register_campus($listCampus = true) {
 }
 
 /**
-<<<<<<< HEAD
  * Set the Site Use Cookie Warning for 1 year
  */
 function api_set_site_use_cookie_warning_cookie()
@@ -7601,4 +7600,16 @@ function apiGetExcludedUserTypes($format = 'array')
     }
 
     return $excludedTypes;
+}
+
+/**
+ * Verify whether a datetime is valid
+ * @param string $dateTime The datetime to validate
+ * @param string $format
+ * @return boolean
+ */
+function apiIsValidDate($dateTime, $format = 'Y-m-d h:m:i') {
+    $tempDate = DateTime::createFromFormat($format, $dateTime);
+
+    return $tempDate && $tempDate->format($format) == $dateTime;
 }
