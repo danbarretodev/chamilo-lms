@@ -671,7 +671,6 @@ if (!empty($return)) {
 
         <?php
         }
-    ?>
 
 $form->display();
 ?>
