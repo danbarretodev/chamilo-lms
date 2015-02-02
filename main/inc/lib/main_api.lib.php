@@ -4684,7 +4684,8 @@ function api_get_status_langvars() {
         DRH             => get_lang('Drh', ''),
         STUDENT         => get_lang('Student', ''),
         ANONYMOUS       => get_lang('Anonymous', ''),
-        STUDENT_BOSS       => get_lang('RoleStudentBoss', '')
+        STUDENT_BOSS       => get_lang('RoleStudentBoss', ''),
+        ROLE_INVITED => get_lang('Invited'),
     );
 }
 
