@@ -167,12 +167,35 @@ $brochure->save(array(
     'field_changeable' => 1
 ));
 
-$publicoObjetivo = new ExtraField('session');
-$publicoObjetivo->save(array(
+$targetOptions = array(
+    get_lang('Minedu'),
+    get_lang('Regiones')
+);
+
+$target = new ExtraField('session');
+$target->save(array(
     'field_type' => ExtraField::FIELD_TYPE_SELECT,
-    'field_variable' => 'publico_objetivo',
-    'field_display_text' => 'Público objetivo',
+    'field_variable' => 'target',
+    'field_display_text' => get_lang('Target'),
     'field_visible' => 1,
     'field_changeable' => 1,
-    'field_options' => 'Minedu; Regiones'
+    'field_options' => implode('; ', $targetOptions)
+));
+
+$shortDescription = new ExtraField('session');
+$shortDescription->save(array(
+    'field_type' => ExtraField::FIELD_TYPE_TEXT,
+    'field_variable' => 'short_description',
+    'field_display_text' => get_lang('ShortSescription'),
+    'field_visible' => 1,
+    'field_changeable' => 1
+));
+
+$id = new ExtraField('session');
+$id->save(array(
+    'field_type' => ExtraField::FIELD_TYPE_TEXT,
+    'field_variable' => 'id',
+    'field_display_text' => get_lang('Id'),
+    'field_visible' => 1,
+    'field_changeable' => 1
 ));
