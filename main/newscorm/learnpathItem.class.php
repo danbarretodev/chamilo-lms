@@ -3861,25 +3861,26 @@ class learnpathItem
                         'learnpathItem::write_to_db() - Inserting into item_view forced: ' . print_r($params, 1),
                         0
                     );
-                }
 
                 $this->db_item_view_id = Database::insert($item_view_table, $params);
             } else {
                 if ($this->type == 'hotpotatoes') {
-                    $params = array(
-                        'total_time' => $this->get_total_time(),
-                        'start_time' => $this->get_current_start_time(),
-                        'score' =>  $this->get_score(),
-                        'status' => $this->get_status(false),
-                        'max_score' => $this->get_max(),
-                        'suspend_data' => $this->current_data,
-                        'lesson_location' => $this->lesson_location
-                    );
-                    $where = array(
-                        'c_id = ? AND lp_item_id = ? AND lp_view_id = ? AND view_count = ?' =>
-                        array($course_id, $this->db_id, $this->view_id, $this->get_attempt_id())
-                    );
-                    Database::update($item_view_table, $params, $where);
+                    if (!apiIsInvitedUser()) {
+                        $params = array(
+                            'total_time' => $this->get_total_time(),
+                            'start_time' => $this->get_current_start_time(),
+                            'score' =>  $this->get_score(),
+                            'status' => $this->get_status(false),
+                            'max_score' => $this->get_max(),
+                            'suspend_data' => $this->current_data,
+                            'lesson_location' => $this->lesson_location
+                        );
+                        $where = array(
+                            'c_id = ? AND lp_item_id = ? AND lp_view_id = ? AND view_count = ?' =>
+                            array($course_id, $this->db_id, $this->view_id, $this->get_attempt_id())
+                        );
+                        Database::update($item_view_table, $params, $where);
+                    }
                 } else {
                     // For all other content types...
                     if ($this->type == 'quiz') {

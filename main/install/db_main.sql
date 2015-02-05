@@ -226,6 +226,19 @@ CREATE TABLE IF NOT EXISTS course_field (
 );
 
 --
+-- Table structure for table course_field_optionss
+--
+
+CREATE TABLE course_field_options (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    field_id INT NOT NULL,
+    option_value TEXT,
+    option_display_text VARCHAR(64),
+    option_order INT,
+    tms DATETIME
+);
+
+--
 -- Table structure for table course_field_values
 --
 
@@ -534,6 +547,20 @@ CREATE TABLE IF NOT EXISTS session_field (
     tms DATETIME NOT NULL default '0000-00-00 00:00:00',
     PRIMARY KEY(id)
 );
+
+--
+-- Table structure for table session_field_options
+--
+
+CREATE TABLE session_field_options (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    field_id INT NOT NULL,
+    option_value TEXT,
+    option_display_text VARCHAR(64),
+    option_order INT,
+    tms DATETIME
+);
+
 
 DROP TABLE IF EXISTS session_field_values;
 CREATE TABLE IF NOT EXISTS session_field_values(
@@ -3049,3 +3076,4 @@ CREATE TABLE IF NOT EXISTS hook_call(
     enabled tinyint NOT NULL,
     PRIMARY KEY PK_hook_management_hook_call(id)
 );
+-- 1.10.x-specific, non-course-related, database changes

@@ -7521,32 +7521,6 @@ function api_register_campus($listCampus = true) {
 }
 
 /**
- * Set the Site Use Cookie Warning for 1 year
- */
-function api_set_site_use_cookie_warning_cookie()
-{
-    setcookie("ChamiloUsesCookies", "ok", time()+31556926);
-}
-
-/**
- * Return true if the Site Use Cookie Warning Cookie warning exists
- * @return bool
- */
-function api_site_use_cookie_warning_cookie_exist()
-{
-    return isset($_COOKIE['ChamiloUsesCookies']);
-}
-
-/**
- * Return true if the user is student boss
- * @return bool
- */
-function api_is_student_boss () {
-    global $_user;
-
-    return isset($_user['status']) && $_user['status'] == STUDENT_BOSS;
-}
-/*
  * Check whether the user type should be exclude.
  * Such as invited or anonymous users
  * @param boolean $checkDB Optional. Whether check the user status
@@ -7601,6 +7575,23 @@ function apiGetExcludedUserTypes($format = 'array')
     }
 
     return $excludedTypes;
+}
+
+/**
+ * Set the Site Use Cookie Warning for 1 year
+ */
+function api_set_site_use_cookie_warning_cookie()
+{
+    setcookie("ChamiloUsesCookies", "ok", time()+31556926);
+}
+
+/**
+ * Return true if the Site Use Cookie Warning Cookie warning exists
+ * @return bool
+ */
+function api_site_use_cookie_warning_cookie_exist()
+{
+    return isset($_COOKIE['ChamiloUsesCookies']);
 }
 
 /**

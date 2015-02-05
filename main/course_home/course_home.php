@@ -133,9 +133,9 @@ define('TOOL_DRH', 'tool_drh');
 define('TOOL_STUDENT_VIEW', 'toolstudentview');
 define('TOOL_ADMIN_VISIBLE', 'tooladminvisible');
 
-$user_id 		= api_get_user_id();
-$course_code 	= api_get_course_id();
-$sessionId      = api_get_session_id();
+$user_id = api_get_user_id();
+$course_code = api_get_course_id();
+$sessionId = api_get_session_id();
 $show_message = '';
 
 if (apiIsInvitedUser()) {

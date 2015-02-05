@@ -356,12 +356,13 @@ class learnpath
                             $this->items[$item_id]->set_status($this->default_status);
                         }
                         // Add that row to the lp_item_view table so that we have something to show in the stats page.
-                        $sql_ins = "INSERT INTO $lp_item_view_table (c_id, lp_item_id, lp_view_id, view_count, status)
+                        $sql = "INSERT INTO $lp_item_view_table (c_id, lp_item_id, lp_view_id, view_count, status)
                                     VALUES ($course_id, ".$item_id . "," . $this->lp_view_id . ", 1, 'not attempted')";
                         if ($this->debug > 2) {
                             error_log('New LP - learnpath::__construct() ' . __LINE__ . ' - Inserting blank item_view : ' . $sql_ins, 0);
                         }
-                        Database::query($sql_ins);
+                        $this->items[$item_id]->set_lp_view($this->lp_view_id, $course_id);
+                        Database::query($sql);
                     }
                 }
             }
