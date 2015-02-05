@@ -7578,6 +7578,18 @@ function apiGetExcludedUserTypes($format = 'array')
 }
 
 /**
+ * Checks whether current user is a student boss
+ * @global array $_user
+ * @return boolean
+ */
+function api_is_student_boss ()
+{
+    global $_user;
+
+    return isset($_user['status']) && $_user['status'] == STUDENT_BOSS;
+}
+
+/**
  * Set the Site Use Cookie Warning for 1 year
  */
 function api_set_site_use_cookie_warning_cookie()
